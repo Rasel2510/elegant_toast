@@ -1,3 +1,8 @@
+## 1.0.2
+
+### Improvements
+- Replaced deprecated `withOpacity()` with `withValues()` to avoid color precision loss
+
 ## 1.0.1
 
 ### New Features

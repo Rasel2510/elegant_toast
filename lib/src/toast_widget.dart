@@ -195,7 +195,7 @@ class _ToastWidgetState extends State<ToastWidget>
                       border: Border.all(color: borderColor, width: 0.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -260,8 +260,8 @@ class _ToastWidgetState extends State<ToastWidget>
                                         style: config.messageStyle ??
                                             TextStyle(
                                               fontSize: 12.5,
-                                              color:
-                                                  messageColor.withOpacity(0.8),
+                                              color: messageColor.withValues(
+                                                  alpha: 0.8),
                                             ),
                                       ),
                                     ],
@@ -283,14 +283,12 @@ class _ToastWidgetState extends State<ToastWidget>
                                           ),
                                           child: Text(
                                             config.action!.label,
-                                            style:
-                                                config.action!.labelStyle ??
-                                                    const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
+                                            style: config.action!.labelStyle ??
+                                                const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -307,7 +305,7 @@ class _ToastWidgetState extends State<ToastWidget>
                                   child: Icon(
                                     Icons.close,
                                     size: 15,
-                                    color: titleColor.withOpacity(0.45),
+                                    color: titleColor.withValues(alpha: 0.45),
                                   ),
                                 ),
                               ],
@@ -335,7 +333,7 @@ class _ToastWidgetState extends State<ToastWidget>
                                   value: 1.0 - _progressController.value,
                                   minHeight: 3,
                                   backgroundColor:
-                                      progressColor.withOpacity(0.15),
+                                      progressColor.withValues(alpha: 0.15),
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                       progressColor),
                                 );
@@ -456,23 +454,22 @@ class _LoadingToastWidgetState extends State<LoadingToastWidget>
             child: SlideTransition(
               position: _slideAnimation,
               child: Container(
-                constraints:
-                    const BoxConstraints(minWidth: 280, maxWidth: 400),
+                constraints: const BoxConstraints(minWidth: 280, maxWidth: 400),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE6F1FB),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: const Color(0xFF85B7EB), width: 0.5),
+                  border:
+                      Border.all(color: const Color(0xFF85B7EB), width: 0.5),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -481,8 +478,7 @@ class _LoadingToastWidgetState extends State<LoadingToastWidget>
                       height: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(spinnerColor),
+                        valueColor: AlwaysStoppedAnimation<Color>(spinnerColor),
                       ),
                     ),
                     const SizedBox(width: 12),

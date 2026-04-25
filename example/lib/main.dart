@@ -164,16 +164,16 @@ class ToastDemoPage extends StatelessWidget {
             type: ToastType.success,
             title: 'Custom styled!',
             message: 'Fully custom colors and icon.',
-            config: ToastConfig(
-              backgroundColor: const Color(0xFF1A1A2E),
-              borderColor: const Color(0xFF7F77DD),
-              iconBackgroundColor: const Color(0xFF7F77DD),
-              icon: const Icon(Icons.star_rounded, color: Colors.white, size: 16),
-              titleStyle: const TextStyle(
+            config: const ToastConfig(
+              backgroundColor: Color(0xFF1A1A2E),
+              borderColor: Color(0xFF7F77DD),
+              iconBackgroundColor: Color(0xFF7F77DD),
+              icon: Icon(Icons.star_rounded, color: Colors.white, size: 16),
+              titleStyle: TextStyle(
                   color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-              messageStyle: const TextStyle(color: Colors.white70, fontSize: 13),
+              messageStyle: TextStyle(color: Colors.white70, fontSize: 13),
               showProgressBar: true,
-              progressBarColor: const Color(0xFF7F77DD),
+              progressBarColor: Color(0xFF7F77DD),
               animation: ToastAnimation.scale,
             ),
           )),
