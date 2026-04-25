@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'toast_type.dart';
+import 'toast_animation.dart';
+import 'toast_action.dart';
 
+/// Configuration for customizing the toast appearance and behavior.
+///
+/// All fields are optional — defaults are applied per [ToastType].
+///
+/// Example:
+/// ```dart
+/// ToastConfig(
+///   backgroundColor: Colors.black,
+///   showProgressBar: true,
+///   action: ToastAction(label: 'Undo', onPressed: () {}),
+///   animation: ToastAnimation.scale,
+///   duration: Duration(seconds: 5),
+/// )
+/// ```
 class ToastConfig {
   /// Background color of the toast. Defaults to type color if null.
   final Color? backgroundColor;
@@ -8,7 +24,7 @@ class ToastConfig {
   /// Border color of the toast. Defaults to type color if null.
   final Color? borderColor;
 
-  /// Icon widget. Defaults to type icon if null.
+  /// Custom icon widget. Defaults to type icon if null.
   final Widget? icon;
 
   /// Icon background color. Defaults to type color if null.
@@ -21,16 +37,37 @@ class ToastConfig {
   final TextStyle? messageStyle;
 
   /// Duration before toast auto-dismisses. Default is 3 seconds.
+  /// Has no effect when [persistent] is true.
   final Duration duration;
 
-  /// Whether to show the close button.
+  /// Whether to show the close button. Default is true.
   final bool showCloseButton;
 
-  /// Border radius of the toast.
+  /// Border radius of the toast container.
   final BorderRadius? borderRadius;
 
-  /// Custom padding inside the toast.
+  /// Internal padding of the toast container.
   final EdgeInsets? padding;
+
+  /// Whether to show a progress bar that counts down the [duration].
+  /// Default is false.
+  final bool showProgressBar;
+
+  /// Color of the progress bar. Defaults to the type's icon color.
+  final Color? progressBarColor;
+
+  /// An optional action button shown inside the toast (e.g. "Undo", "Retry").
+  final ToastAction? action;
+
+  /// If true, the toast will not auto-dismiss. User must close manually.
+  /// Default is false.
+  final bool persistent;
+
+  /// Whether the user can swipe the toast to dismiss it. Default is true.
+  final bool swipeToDismiss;
+
+  /// The entrance/exit animation style. Default is [ToastAnimation.slideAndFade].
+  final ToastAnimation animation;
 
   const ToastConfig({
     this.backgroundColor,
@@ -43,10 +80,17 @@ class ToastConfig {
     this.showCloseButton = true,
     this.borderRadius,
     this.padding,
+    this.showProgressBar = false,
+    this.progressBarColor,
+    this.action,
+    this.persistent = false,
+    this.swipeToDismiss = true,
+    this.animation = ToastAnimation.slideAndFade,
   });
 }
 
-class _ToastTheme {
+/// Internal theme data resolved from [ToastType].
+class ToastTheme {
   final Color backgroundColor;
   final Color borderColor;
   final Color iconBackground;
@@ -54,7 +98,7 @@ class _ToastTheme {
   final Color messageColor;
   final String iconLabel;
 
-  const _ToastTheme({
+  const ToastTheme({
     required this.backgroundColor,
     required this.borderColor,
     required this.iconBackground,
@@ -64,51 +108,52 @@ class _ToastTheme {
   });
 }
 
-_ToastTheme getToastTheme(ToastType type) {
+/// Resolves the default theme colors for a given [ToastType].
+ToastTheme getToastTheme(ToastType type) {
   switch (type) {
     case ToastType.success:
-      return _ToastTheme(
-        backgroundColor: const Color(0xFFEAF3DE),
-        borderColor: const Color(0xFF97C459),
-        iconBackground: const Color(0xFF639922),
-        titleColor: const Color(0xFF3B6D11),
-        messageColor: const Color(0xFF3B6D11),
+      return const ToastTheme(
+        backgroundColor: Color(0xFFEAF3DE),
+        borderColor: Color(0xFF97C459),
+        iconBackground: Color(0xFF639922),
+        titleColor: Color(0xFF3B6D11),
+        messageColor: Color(0xFF3B6D11),
         iconLabel: '✓',
       );
     case ToastType.error:
-      return _ToastTheme(
-        backgroundColor: const Color(0xFFFCEBEB),
-        borderColor: const Color(0xFFF09595),
-        iconBackground: const Color(0xFFA32D2D),
-        titleColor: const Color(0xFF791F1F),
-        messageColor: const Color(0xFF791F1F),
+      return const ToastTheme(
+        backgroundColor: Color(0xFFFCEBEB),
+        borderColor: Color(0xFFF09595),
+        iconBackground: Color(0xFFA32D2D),
+        titleColor: Color(0xFF791F1F),
+        messageColor: Color(0xFF791F1F),
         iconLabel: '✕',
       );
     case ToastType.warning:
-      return _ToastTheme(
-        backgroundColor: const Color(0xFFFAEEDA),
-        borderColor: const Color(0xFFEF9F27),
-        iconBackground: const Color(0xFFBA7517),
-        titleColor: const Color(0xFF854F0B),
-        messageColor: const Color(0xFF854F0B),
+      return const ToastTheme(
+        backgroundColor: Color(0xFFFAEEDA),
+        borderColor: Color(0xFFEF9F27),
+        iconBackground: Color(0xFFBA7517),
+        titleColor: Color(0xFF854F0B),
+        messageColor: Color(0xFF854F0B),
         iconLabel: '!',
       );
     case ToastType.info:
-      return _ToastTheme(
-        backgroundColor: const Color(0xFFE6F1FB),
-        borderColor: const Color(0xFF85B7EB),
-        iconBackground: const Color(0xFF185FA5),
-        titleColor: const Color(0xFF0C447C),
-        messageColor: const Color(0xFF0C447C),
+      return const ToastTheme(
+        backgroundColor: Color(0xFFE6F1FB),
+        borderColor: Color(0xFF85B7EB),
+        iconBackground: Color(0xFF185FA5),
+        titleColor: Color(0xFF0C447C),
+        messageColor: Color(0xFF0C447C),
         iconLabel: 'i',
       );
     case ToastType.neutral:
-      return _ToastTheme(
-        backgroundColor: const Color(0xFFF1EFE8),
-        borderColor: const Color(0xFFB4B2A9),
-        iconBackground: const Color(0xFF5F5E5A),
-        titleColor: const Color(0xFF2C2C2A),
-        messageColor: const Color(0xFF444441),
+      return const ToastTheme(
+        backgroundColor: Color(0xFFF1EFE8),
+        borderColor: Color(0xFFB4B2A9),
+        iconBackground: Color(0xFF5F5E5A),
+        titleColor: Color(0xFF2C2C2A),
+        messageColor: Color(0xFF444441),
         iconLabel: '→',
       );
   }
