@@ -1,3 +1,9 @@
+## 1.0.3
+
+### Changed
+- Improved README with clearer usage examples
+- Added installation instructions
+
 ## 1.0.2
 
 ### Improvements

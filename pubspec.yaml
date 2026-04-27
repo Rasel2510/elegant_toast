@@ -1,6 +1,6 @@
 name: elegant_toast
 description: A beautiful, customizable Flutter toast package with progress bar, action buttons, toast queue, swipe to dismiss, persistent toasts, and loading toasts.
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/Rasal2510/elegant_toast
 repository: https://github.com/Rasal2510/elegant_toast
 issue_tracker: https://github.com/Rasal2510/elegant_toast/issues
