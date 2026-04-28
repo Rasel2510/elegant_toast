@@ -1,6 +1,6 @@
 # elegant_toast
 
-[![pub version](https://img.shields.io/badge/pub-1.0.3-blue)](https://pub.dev/packages/elegant_toast)
+[![pub version](https://img.shields.io/badge/pub-1.0.4-blue)](https://pub.dev/packages/elegant_toast)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)](https://flutter.dev)
 
@@ -29,7 +29,7 @@ A beautiful, customizable Flutter toast notification package with progress bar, 
 
 ```yaml
 dependencies:
-  elegant_toast: ^1.0.3
+  elegant_toast: ^1.0.4
 ```
 
 ---
@@ -598,5 +598,4 @@ AppToast.deleted(onUndo: () => restoreItem());
 
 ## License
 
-MIT © 2026 RASEL
-
+MIT © 2024 ElegantToast Contributors

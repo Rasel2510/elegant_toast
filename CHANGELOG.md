@@ -1,3 +1,9 @@
+## 1.0.4
+
+### Improvements
+- `navigatorKey` is no longer `final` — can now be assigned an existing key
+- Supports sharing navigatorKey with other services (e.g. NavigationService, GetX)
+
 ## 1.0.3
 
 ### Changed

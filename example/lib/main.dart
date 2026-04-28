@@ -1,7 +1,5 @@
-import 'package:elegant_toast/elegant_toast.dart';
 import 'package:flutter/material.dart';
-
-import 'app_toast.dart';
+import 'package:elegant_toast/elegant_toast.dart';
 
 void main() => runApp(const MyApp());
 
@@ -11,387 +9,202 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AppToast Test',
-      navigatorKey: ElegantToast.navigatorKey,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const ToastTestPage(),
+      title: 'Elegant Toast Example',
+      navigatorKey: ElegantToast.navigatorKey, // Required for context-free calls
+      theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
+      home: const ToastDemoPage(),
     );
   }
 }
 
-class ToastTestPage extends StatelessWidget {
-  const ToastTestPage({super.key});
+class ToastDemoPage extends StatelessWidget {
+  const ToastDemoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 6,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('AppToast Test'),
-          bottom: const TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(text: 'Auth'),
-              Tab(text: 'Booking'),
-              Tab(text: 'Payment'),
-              Tab(text: 'Network'),
-              Tab(text: 'Profile & Review'),
-              Tab(text: 'General'),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Elegant Toast 1.0.1')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _section('Basic Toasts (Context-free)'),
+          _btn('Success', () => ElegantToast.showSuccess(
+            title: 'Booking confirmed!',
+            message: 'Your tour has been successfully booked.',
+          )),
+          _btn('Error', () => ElegantToast.showError(
+            title: 'Something went wrong',
+            message: 'Could not complete the request.',
+          )),
+          _btn('Warning', () => ElegantToast.showWarning(
+            title: 'Session expiring soon',
+            message: 'You will be logged out in 5 minutes.',
+            position: ToastPosition.top,
+          )),
+          _btn('Info', () => ElegantToast.showInfo(
+            title: 'Update available',
+            message: 'A new version of the app is ready.',
+            position: ToastPosition.topRight,
+          )),
+          _btn('Neutral', () => ElegantToast.showNeutral(
+            title: 'Copied to clipboard',
+            position: ToastPosition.bottomRight,
+          )),
+
+          _section('Progress Bar'),
+          _btn('Success + Progress Bar', () => ElegantToast.showSuccess(
+            title: 'File uploaded!',
+            message: 'Your file has been saved.',
+            config: const ToastConfig(
+              showProgressBar: true,
+              duration: Duration(seconds: 5),
+            ),
+          )),
+          _btn('Error + Progress Bar', () => ElegantToast.showError(
+            title: 'Upload failed',
+            message: 'Check your connection.',
+            config: const ToastConfig(
+              showProgressBar: true,
+              duration: Duration(seconds: 4),
+            ),
+          )),
+
+          _section('Action Button'),
+          _btn('With Undo Action', () => ElegantToast.showNeutral(
+            title: 'Item deleted',
+            message: 'The item has been removed.',
+            config: ToastConfig(
+              showProgressBar: true,
+              duration: const Duration(seconds: 5),
+              action: ToastAction(
+                label: 'Undo',
+                onPressed: () => debugPrint('Undo tapped!'),
+              ),
+            ),
+          )),
+          _btn('With Retry Action', () => ElegantToast.showError(
+            title: 'Upload failed',
+            config: ToastConfig(
+              showProgressBar: true,
+              action: ToastAction(
+                label: 'Retry',
+                onPressed: () => debugPrint('Retry tapped!'),
+              ),
+            ),
+          )),
+
+          _section('Toast Queue'),
+          _btn('Queue 3 Toasts', () {
+            ElegantToast.showSuccess(title: 'First toast', useQueue: true);
+            ElegantToast.showWarning(title: 'Second toast', useQueue: true);
+            ElegantToast.showInfo(title: 'Third toast', useQueue: true);
+          }),
+
+          _section('Loading Toast'),
+          _btn('Loading → Success', () async {
+            ElegantToast.showLoading(
+              title: 'Uploading file...',
+              message: 'Please wait',
+            );
+            await Future.delayed(const Duration(seconds: 2));
+            ElegantToast.completeLoading(
+              type: ToastType.success,
+              title: 'Uploaded!',
+              message: 'File saved successfully.',
+            );
+          }),
+          _btn('Loading → Error', () async {
+            ElegantToast.showLoading(title: 'Saving...');
+            await Future.delayed(const Duration(seconds: 2));
+            ElegantToast.completeLoading(
+              type: ToastType.error,
+              title: 'Save failed',
+              message: 'Server error. Try again.',
+            );
+          }),
+
+          _section('Animations'),
+          _btn('Slide & Fade (default)', () => ElegantToast.showSuccess(
+            title: 'Slide & Fade',
+            config: const ToastConfig(animation: ToastAnimation.slideAndFade),
+          )),
+          _btn('Scale', () => ElegantToast.showInfo(
+            title: 'Scale animation',
+            config: const ToastConfig(animation: ToastAnimation.scale),
+          )),
+          _btn('Bounce', () => ElegantToast.showSuccess(
+            title: 'Bounce animation',
+            config: const ToastConfig(animation: ToastAnimation.bounce),
+          )),
+          _btn('Fade only', () => ElegantToast.showNeutral(
+            title: 'Fade animation',
+            config: const ToastConfig(animation: ToastAnimation.fade),
+          )),
+
+          _section('Persistent Toast'),
+          _btn('Persistent (manual close)', () => ElegantToast.showWarning(
+            title: 'Action required',
+            message: 'Please complete your profile.',
+            config: const ToastConfig(persistent: true),
+          )),
+
+          _section('Swipe to Dismiss'),
+          _btn('Swipe me left/right', () => ElegantToast.showInfo(
+            title: 'Swipe to dismiss',
+            message: 'Drag me left or right!',
+            config: const ToastConfig(
+              duration: Duration(seconds: 8),
+              swipeToDismiss: true,
+            ),
+          )),
+
+          _section('Custom Styling'),
+          _btn('Dark custom toast', () => ElegantToast.show(
+            context,
+            type: ToastType.success,
+            title: 'Custom styled!',
+            message: 'Fully custom colors and icon.',
+            config: const ToastConfig(
+              backgroundColor: Color(0xFF1A1A2E),
+              borderColor: Color(0xFF7F77DD),
+              iconBackgroundColor: Color(0xFF7F77DD),
+              icon: Icon(Icons.star_rounded, color: Colors.white, size: 16),
+              titleStyle: TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+              messageStyle: TextStyle(color: Colors.white70, fontSize: 13),
+              showProgressBar: true,
+              progressBarColor: Color(0xFF7F77DD),
+              animation: ToastAnimation.scale,
+            ),
+          )),
+
+          _section('Context-based'),
+          _btn('Context success', () => ElegantToast.success(
+            context,
+            title: 'Context-based!',
+            message: 'Called with BuildContext.',
+          )),
+
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _section(String title) => Padding(
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 8),
+        child: Text(title,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.black54)),
+      );
+
+  Widget _btn(String label, VoidCallback onTap) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: ElevatedButton(
+          onPressed: onTap,
+          child: Text(label),
         ),
-        body: const TabBarView(
-          children: [
-            _AuthTab(),
-            _BookingTab(),
-            _PaymentTab(),
-            _NetworkTab(),
-            _ProfileReviewTab(),
-            _GeneralTab(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────
-// AUTH TAB
-// ─────────────────────────────────────────
-class _AuthTab extends StatelessWidget {
-  const _AuthTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ToastList(items: [
-      const _ToastItem(
-        label: 'Login Success',
-        color: Colors.green,
-        onTap: AppToast.loginSuccess,
-      ),
-      _ToastItem(
-        label: 'Login Failed',
-        color: Colors.red,
-        onTap: () =>
-            AppToast.loginFailed(message: 'Invalid email or password.'),
-      ),
-      _ToastItem(
-        label: 'Login Failed (custom)',
-        color: Colors.red,
-        onTap: () =>
-            AppToast.loginFailed(message: 'Account has been suspended.'),
-      ),
-      const _ToastItem(
-        label: 'Logout Success',
-        color: Colors.grey,
-        onTap: AppToast.logoutSuccess,
-      ),
-      const _ToastItem(
-        label: 'Register Success',
-        color: Colors.green,
-        onTap: AppToast.registerSuccess,
-      ),
-      _ToastItem(
-        label: 'Register Failed',
-        color: Colors.red,
-        onTap: () => AppToast.registerFailed(message: 'Email already in use.'),
-      ),
-      const _ToastItem(
-        label: 'Password Changed',
-        color: Colors.green,
-        onTap: AppToast.passwordChanged,
-      ),
-      const _ToastItem(
-        label: 'Session Expired',
-        color: Colors.orange,
-        onTap: AppToast.sessionExpired,
-      ),
-      const _ToastItem(
-        label: 'Dismiss',
-        color: Colors.blueGrey,
-        onTap: AppToast.dismiss,
-      ),
-    ]);
-  }
-}
-
-// ─────────────────────────────────────────
-// BOOKING TAB
-// ─────────────────────────────────────────
-class _BookingTab extends StatelessWidget {
-  const _BookingTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ToastList(items: [
-      const _ToastItem(
-        label: 'Booking Confirmed',
-        color: Colors.green,
-        onTap: AppToast.bookingConfirmed,
-      ),
-      _ToastItem(
-        label: 'Booking Failed',
-        color: Colors.red,
-        onTap: () => AppToast.bookingFailed(message: 'No slots available.'),
-      ),
-      const _ToastItem(
-        label: 'Booking Cancelled',
-        color: Colors.grey,
-        onTap: AppToast.bookingCancelled,
-      ),
-      const _ToastItem(
-        label: 'Booking Updated',
-        color: Colors.green,
-        onTap: AppToast.bookingUpdated,
-      ),
-    ]);
-  }
-}
-
-// ─────────────────────────────────────────
-// PAYMENT TAB
-// ─────────────────────────────────────────
-class _PaymentTab extends StatelessWidget {
-  const _PaymentTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ToastList(items: [
-      const _ToastItem(
-        label: 'Payment Success',
-        color: Colors.green,
-        onTap: AppToast.paymentSuccess,
-      ),
-      _ToastItem(
-        label: 'Payment Failed',
-        color: Colors.red,
-        onTap: () => AppToast.paymentFailed(message: 'Card was declined.'),
-      ),
-      const _ToastItem(
-        label: 'Payment Pending',
-        color: Colors.orange,
-        onTap: AppToast.paymentPending,
-      ),
-    ]);
-  }
-}
-
-// ─────────────────────────────────────────
-// NETWORK TAB
-// ─────────────────────────────────────────
-class _NetworkTab extends StatelessWidget {
-  const _NetworkTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ToastList(items: [
-      const _ToastItem(
-        label: 'No Internet',
-        color: Colors.red,
-        onTap: AppToast.noInternet,
-      ),
-      const _ToastItem(
-        label: 'Internet Restored',
-        color: Colors.green,
-        onTap: AppToast.internetRestored,
-      ),
-      _ToastItem(
-        label: 'Server Error',
-        color: Colors.red,
-        onTap: () =>
-            AppToast.serverError(message: '500 Internal Server Error.'),
-      ),
-      const _ToastItem(
-        label: 'Request Timeout',
-        color: Colors.orange,
-        onTap: AppToast.requestTimeout,
-      ),
-      const _ToastItem(
-        label: 'Dismiss Persistent',
-        color: Colors.blueGrey,
-        onTap: AppToast.dismiss,
-      ),
-    ]);
-  }
-}
-
-// ─────────────────────────────────────────
-// PROFILE & REVIEW TAB
-// ─────────────────────────────────────────
-class _ProfileReviewTab extends StatelessWidget {
-  const _ProfileReviewTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ToastList(items: [
-      const _ToastItem(
-        label: 'Profile Updated',
-        color: Colors.green,
-        onTap: AppToast.profileUpdated,
-      ),
-      _ToastItem(
-        label: 'Profile Update Failed',
-        color: Colors.red,
-        onTap: () =>
-            AppToast.profileUpdateFailed(message: 'Username already taken.'),
-      ),
-      const _ToastItem(
-        label: 'Profile Picture Updated',
-        color: Colors.green,
-        onTap: AppToast.profilePictureUpdated,
-      ),
-      const _ToastItem(
-        label: 'Review Submitted',
-        color: Colors.green,
-        onTap: AppToast.reviewSubmitted,
-      ),
-      _ToastItem(
-        label: 'Review Failed',
-        color: Colors.red,
-        onTap: () =>
-            AppToast.reviewFailed(message: 'You have already reviewed this.'),
-      ),
-    ]);
-  }
-}
-
-// ─────────────────────────────────────────
-// GENERAL TAB
-// ─────────────────────────────────────────
-class _GeneralTab extends StatelessWidget {
-  const _GeneralTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ToastList(items: [
-      _ToastItem(
-        label: 'Upload → Success',
-        color: Colors.blue,
-        onTap: () async {
-          AppToast.uploadStarted();
-          await Future.delayed(const Duration(seconds: 2));
-          AppToast.uploadSuccess();
-        },
-      ),
-      _ToastItem(
-        label: 'Upload → Failed',
-        color: Colors.red,
-        onTap: () async {
-          AppToast.uploadStarted();
-          await Future.delayed(const Duration(seconds: 2));
-          AppToast.uploadFailed(message: 'File size exceeds 10MB.');
-        },
-      ),
-      const _ToastItem(
-        label: 'Download Success',
-        color: Colors.green,
-        onTap: AppToast.downloadSuccess,
-      ),
-      _ToastItem(
-        label: 'Copied to Clipboard',
-        color: Colors.blueGrey,
-        onTap: () => AppToast.copied(label: 'Phone number'),
-      ),
-      const _ToastItem(
-        label: 'Saved',
-        color: Colors.green,
-        onTap: AppToast.saved,
-      ),
-      _ToastItem(
-        label: 'Deleted (with Undo)',
-        color: Colors.grey,
-        onTap: () => AppToast.deleted(
-          onUndo: () => debugPrint('Undo tapped — item restored!'),
-        ),
-      ),
-      _ToastItem(
-        label: 'Deleted (no Undo)',
-        color: Colors.grey,
-        onTap: () => AppToast.deleted(),
-      ),
-      const _ToastItem(
-        label: 'Coming Soon',
-        color: Colors.blue,
-        onTap: AppToast.comingSoon,
-      ),
-      const _ToastItem(
-        label: 'Permission Denied',
-        color: Colors.orange,
-        onTap: AppToast.permissionDenied,
-      ),
-      _ToastItem(
-        label: 'Validation Error',
-        color: Colors.orange,
-        onTap: () => AppToast.validationError(message: 'Email is required.'),
-      ),
-      _ToastItem(
-        label: 'Unknown Error',
-        color: Colors.red,
-        onTap: () => AppToast.unknownError(message: 'Please try again later.'),
-      ),
-      _ToastItem(
-        label: 'Queue 3 Toasts',
-        color: Colors.purple,
-        onTap: () {
-          ElegantToast.showSuccess(title: 'Step 1 complete', useQueue: true);
-          ElegantToast.showInfo(title: 'Step 2 running...', useQueue: true);
-          ElegantToast.showSuccess(title: 'All done!', useQueue: true);
-        },
-      ),
-    ]);
-  }
-}
-
-// ─────────────────────────────────────────
-// REUSABLE WIDGETS
-// ─────────────────────────────────────────
-class _ToastList extends StatelessWidget {
-  final List<_ToastItem> items;
-
-  const _ToastList({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) => items[i],
-    );
-  }
-}
-
-class _ToastItem extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ToastItem({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color.withValues(alpha: 0.1),
-        foregroundColor: color,
-        side: BorderSide(color: color.withValues(alpha: 0.3)),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      onPressed: onTap,
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-    );
-  }
+      );
 }

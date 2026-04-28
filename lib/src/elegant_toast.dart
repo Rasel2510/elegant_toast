@@ -53,7 +53,7 @@ class ElegantToast {
   /// ```dart
   /// MaterialApp(navigatorKey: ElegantToast.navigatorKey)
   /// ```
-  static final GlobalKey<NavigatorState> navigatorKey =
+  static GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
   static OverlayState? get _overlay => navigatorKey.currentState?.overlay;
