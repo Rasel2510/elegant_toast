@@ -157,7 +157,8 @@ class _ToastWidgetState extends State<ToastWidget>
     }
   }
 
-  BoxBorder _resolveBorder(Color borderColor, Color? leftBorderColor, Border? customBorder) {
+  BoxBorder _resolveBorder(
+      Color borderColor, Color? leftBorderColor, Border? customBorder) {
     if (customBorder != null) return customBorder;
     if (leftBorderColor != null) {
       return Border(
@@ -192,7 +193,7 @@ class _ToastWidgetState extends State<ToastWidget>
             GestureDetector(
               onHorizontalDragUpdate: _handleDragUpdate,
               onHorizontalDragEnd: _handleDragEnd,
-              onTap: config.onTap, //  onTap on whole toast
+              onTap: config.onTap, // ✅ onTap on whole toast
               child: Transform.translate(
                 offset: Offset(_dragOffset, 0),
                 child: Opacity(
@@ -203,14 +204,8 @@ class _ToastWidgetState extends State<ToastWidget>
                       maxWidth: 400,
                     ),
                     decoration: BoxDecoration(
-                      color: bgColor,
                       borderRadius:
                           config.borderRadius ?? BorderRadius.circular(12),
-                      border: _resolveBorder(
-                        borderColor,
-                        config.leftBorderColor,
-                        config.customBorder,
-                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.08),
@@ -219,148 +214,167 @@ class _ToastWidgetState extends State<ToastWidget>
                         ),
                       ],
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // ─── Main content ───
-                        Padding(
-                          padding: config.padding ??
-                              const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 12),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              /// showIcon: false hides icon completely
-                              if (config.showIcon) ...[
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 1),
-                                  child: config.icon ??
-                                      Container(
-                                        width: 26,
-                                        height: 26,
-                                        decoration: BoxDecoration(
-                                          color: iconBgColor,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          theme.iconLabel,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
-                                ),
-                                const SizedBox(width: 10),
-                              ],
-
-                              // Title + Message + Action
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      widget.title,
-                                      style: config.titleStyle ??
-                                          TextStyle(
-                                            fontSize: 13.5,
-                                            fontWeight: FontWeight.w600,
-                                            color: titleColor,
-                                          ),
-                                    ),
-                                    if (widget.message != null &&
-                                        widget.message!.isNotEmpty) ...[
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        widget.message!,
-                                        maxLines: config.maxLines, //  maxLines
-                                        overflow: config.maxLines != null
-                                            ? TextOverflow.ellipsis
-                                            : null,
-                                        style: config.messageStyle ??
-                                            TextStyle(
-                                              fontSize: 12.5,
-                                              color: messageColor.withValues(
-                                                  alpha: 0.8),
-                                            ),
-                                      ),
-                                    ],
-                                    // Action button
-                                    if (config.action != null) ...[
-                                      const SizedBox(height: 8),
-                                      GestureDetector(
-                                        onTap: () {
-                                          config.action!.onPressed();
-                                          widget.onDismiss();
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 5),
-                                          decoration: BoxDecoration(
-                                            color: iconBgColor,
-                                            borderRadius:
-                                                BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            config.action!.label,
-                                            style:
-                                                config.action!.labelStyle ??
-                                                    const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-
-                              // Close button
-                              if (config.showCloseButton) ...[
-                                const SizedBox(width: 6),
-                                GestureDetector(
-                                  onTap: widget.onDismiss,
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 15,
-                                    color: titleColor.withValues(alpha: 0.45),
-                                  ),
-                                ),
-                              ],
-                            ],
+                    child: ClipRRect(
+                      borderRadius:
+                          config.borderRadius ?? BorderRadius.circular(12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          border: _resolveBorder(
+                            borderColor,
+                            config.leftBorderColor,
+                            config.customBorder,
                           ),
                         ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // ─── Main content ───
+                            Padding(
+                              padding: config.padding ??
+                                  const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // ✅ showIcon: false hides icon completely
+                                  if (config.showIcon) ...[
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 1),
+                                      child: config.icon ??
+                                          Container(
+                                            width: 26,
+                                            height: 26,
+                                            decoration: BoxDecoration(
+                                              color: iconBgColor,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              theme.iconLabel,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                  ],
 
-                        // ─── Progress Bar ───
-                        if (config.showProgressBar && !config.persistent)
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(12),
-                              bottomRight: Radius.circular(12),
+                                  // Title + Message + Action
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          widget.title,
+                                          style: config.titleStyle ??
+                                              TextStyle(
+                                                fontSize: 13.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: titleColor,
+                                              ),
+                                        ),
+                                        if (widget.message != null &&
+                                            widget.message!.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            widget.message!,
+                                            maxLines:
+                                                config.maxLines, // ✅ maxLines
+                                            overflow: config.maxLines != null
+                                                ? TextOverflow.ellipsis
+                                                : null,
+                                            style: config.messageStyle ??
+                                                TextStyle(
+                                                  fontSize: 12.5,
+                                                  color: messageColor
+                                                      .withValues(alpha: 0.8),
+                                                ),
+                                          ),
+                                        ],
+                                        // Action button
+                                        if (config.action != null) ...[
+                                          const SizedBox(height: 8),
+                                          GestureDetector(
+                                            onTap: () {
+                                              config.action!.onPressed();
+                                              widget.onDismiss();
+                                            },
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: iconBgColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                config.action!.label,
+                                                style:
+                                                    config.action!.labelStyle ??
+                                                        const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Close button
+                                  if (config.showCloseButton) ...[
+                                    const SizedBox(width: 6),
+                                    GestureDetector(
+                                      onTap: widget.onDismiss,
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 15,
+                                        color:
+                                            titleColor.withValues(alpha: 0.45),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                            child: AnimatedBuilder(
-                              animation: _progressController,
-                              builder: (context, _) {
-                                return LinearProgressIndicator(
-                                  value: 1.0 - _progressController.value,
-                                  minHeight: 3,
-                                  backgroundColor:
-                                      progressColor.withValues(alpha: 0.15),
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      progressColor),
-                                );
-                              },
-                            ),
-                          ),
-                      ],
+
+                            // ─── Progress Bar ───
+                            if (config.showProgressBar && !config.persistent)
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                                child: AnimatedBuilder(
+                                  animation: _progressController,
+                                  builder: (context, _) {
+                                    return LinearProgressIndicator(
+                                      value: 1.0 - _progressController.value,
+                                      minHeight: 3,
+                                      backgroundColor:
+                                          progressColor.withValues(alpha: 0.15),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          progressColor),
+                                    );
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -474,13 +488,12 @@ class _LoadingToastWidgetState extends State<LoadingToastWidget>
             child: SlideTransition(
               position: _slideAnimation,
               child: Container(
-                constraints:
-                    const BoxConstraints(minWidth: 280, maxWidth: 400),
+                constraints: const BoxConstraints(minWidth: 280, maxWidth: 400),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE6F1FB),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: const Color(0xFF85B7EB), width: 0.5),
+                  border:
+                      Border.all(color: const Color(0xFF85B7EB), width: 0.5),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -489,8 +502,8 @@ class _LoadingToastWidgetState extends State<LoadingToastWidget>
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -499,8 +512,7 @@ class _LoadingToastWidgetState extends State<LoadingToastWidget>
                       height: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(spinnerColor),
+                        valueColor: AlwaysStoppedAnimation<Color>(spinnerColor),
                       ),
                     ),
                     const SizedBox(width: 12),

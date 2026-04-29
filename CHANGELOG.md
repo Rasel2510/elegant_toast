@@ -1,3 +1,8 @@
+## 1.0.7
+
+### Bug Fixes
+- Fixed `borderRadius can only be given on borders with uniform colors` crash when using `customBorder` with different border colors — replaced `BoxDecoration` border+radius with `ClipRRect` approach
+
 ## 1.0.6
 
 ### New Features
