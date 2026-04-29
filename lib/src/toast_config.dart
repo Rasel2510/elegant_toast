@@ -6,17 +6,6 @@ import 'toast_action.dart';
 /// Configuration for customizing the toast appearance and behavior.
 ///
 /// All fields are optional — defaults are applied per [ToastType].
-///
-/// Example:
-/// ```dart
-/// ToastConfig(
-///   backgroundColor: Colors.black,
-///   showProgressBar: true,
-///   action: ToastAction(label: 'Undo', onPressed: () {}),
-///   animation: ToastAnimation.scale,
-///   duration: Duration(seconds: 5),
-/// )
-/// ```
 class ToastConfig {
   /// Background color of the toast. Defaults to type color if null.
   final Color? backgroundColor;
@@ -27,6 +16,14 @@ class ToastConfig {
   /// Custom icon widget. Defaults to type icon if null.
   final Widget? icon;
 
+  /// Whether to show the icon. Default is true.
+  /// Set to false for a simple text-only toast.
+  ///
+  /// ```dart
+  /// ToastConfig(showIcon: false)
+  /// ```
+  final bool showIcon;
+
   /// Icon background color. Defaults to type color if null.
   final Color? iconBackgroundColor;
 
@@ -35,6 +32,14 @@ class ToastConfig {
 
   /// Message text style override.
   final TextStyle? messageStyle;
+
+  /// Maximum number of lines for the message text.
+  /// Default is null (no limit).
+  ///
+  /// ```dart
+  /// ToastConfig(maxLines: 2)
+  /// ```
+  final int? maxLines;
 
   /// Duration before toast auto-dismisses. Default is 3 seconds.
   /// Has no effect when [persistent] is true.
@@ -66,21 +71,27 @@ class ToastConfig {
   /// Whether the user can swipe the toast to dismiss it. Default is true.
   final bool swipeToDismiss;
 
+  /// Called when the user taps anywhere on the toast body.
+  ///
+  /// ```dart
+  /// ToastConfig(
+  ///   onTap: () => Navigator.pushNamed(context, '/details'),
+  /// )
+  /// ```
+  final VoidCallback? onTap;
+
   /// Optional left accent border color.
   /// When set, replaces the full border with a left-only colored border.
   /// Useful for card-style toasts like appointment or reminder notifications.
   ///
-  /// Example:
   /// ```dart
   /// ToastConfig(leftBorderColor: Color(0xFFE91E8C))
   /// ```
-  
   final Color? leftBorderColor;
 
   /// Fully custom border — use Flutter's [Border] to style any side.
   /// When set, overrides [borderColor] and [leftBorderColor].
   ///
-  /// Examples:
   /// ```dart
   /// // Left only
   /// customBorder: Border(left: BorderSide(color: Colors.pink, width: 4))
@@ -88,17 +99,11 @@ class ToastConfig {
   /// // Right only
   /// customBorder: Border(right: BorderSide(color: Colors.blue, width: 4))
   ///
-  /// // Top only
-  /// customBorder: Border(top: BorderSide(color: Colors.green, width: 3))
-  ///
-  /// // Left + Right
+  /// // Top + Bottom
   /// customBorder: Border(
-  ///   left: BorderSide(color: Colors.pink, width: 4),
-  ///   right: BorderSide(color: Colors.blue, width: 4),
+  ///   top: BorderSide(color: Colors.green, width: 3),
+  ///   bottom: BorderSide(color: Colors.green, width: 3),
   /// )
-  ///
-  /// // All sides custom
-  /// customBorder: Border.all(color: Colors.purple, width: 2)
   /// ```
   final Border? customBorder;
 
@@ -109,9 +114,11 @@ class ToastConfig {
     this.backgroundColor,
     this.borderColor,
     this.icon,
+    this.showIcon = true,
     this.iconBackgroundColor,
     this.titleStyle,
     this.messageStyle,
+    this.maxLines,
     this.duration = const Duration(seconds: 3),
     this.showCloseButton = true,
     this.borderRadius,
@@ -121,9 +128,10 @@ class ToastConfig {
     this.action,
     this.persistent = false,
     this.swipeToDismiss = true,
-    this.animation = ToastAnimation.slideAndFade,
+    this.onTap,
     this.leftBorderColor,
-    this.customBorder
+    this.customBorder,
+    this.animation = ToastAnimation.slideAndFade,
   });
 }
 
@@ -196,4 +204,3 @@ ToastTheme getToastTheme(ToastType type) {
       );
   }
 }
-

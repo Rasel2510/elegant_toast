@@ -1,3 +1,11 @@
+## 1.0.6
+
+### New Features
+- **`onTap`** — tap anywhere on the toast body to trigger a callback
+- **`showIcon: false`** — hide the icon for a simple text-only toast
+- **`maxLines`** — limit message lines with ellipsis overflow
+-
+
 ## 1.0.5
 
 ### New Features
