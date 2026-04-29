@@ -1,6 +1,6 @@
 # elegant_toast
 
-[![pub version](https://img.shields.io/badge/pub-1.0.4-blue)](https://pub.dev/packages/elegant_toast)
+[![pub version](https://img.shields.io/badge/pub-1.0.5-blue)](https://pub.dev/packages/elegant_toast)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)](https://flutter.dev)
 
@@ -22,6 +22,7 @@ A beautiful, customizable Flutter toast notification package with progress bar, 
 - ✅ Fully customizable — colors, icons, text styles, border radius, padding
 - ✅ Context-free calls via `navigatorKey` — use from Rx, services, blocs
 - ✅ `dismiss()` and `clearQueue()` for programmatic control
+- ✅ Left border accent — card-style toasts like appointments and reminders
 
 ---
 
@@ -412,6 +413,7 @@ ElegantToast.show(
   config: ToastConfig(
     backgroundColor: const Color(0xFF1A1A2E),
     borderColor: const Color(0xFF7F77DD),
+    leftBorderColor: const Color(0xFF7F77DD), 
     iconBackgroundColor: const Color(0xFF7F77DD),
     icon: const Icon(Icons.star_rounded, color: Colors.white, size: 16),
     titleStyle: const TextStyle(
@@ -547,6 +549,7 @@ AppToast.deleted(onUndo: () => restoreItem());
 | `persistent` | `bool` | `false` | Disable auto-dismiss — user must close manually |
 | `swipeToDismiss` | `bool` | `true` | Allow left/right swipe to dismiss |
 | `animation` | `ToastAnimation` | `slideAndFade` | Entrance/exit animation style |
+| `leftBorderColor` | `Color?` | `null` | Left accent border color — when set, left border becomes 4px wide with this color |
 
 ---
 

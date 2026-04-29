@@ -1,3 +1,10 @@
+## 1.0.5
+
+### New Features
+- **Left border accent** — `leftBorderColor` in `ToastConfig` adds a colored left-side border
+- Useful for card-style toasts like appointments, reminders, or calendar events
+
+
 ## 1.0.4
 
 ### Improvements

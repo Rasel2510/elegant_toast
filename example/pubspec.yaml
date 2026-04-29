@@ -1,6 +1,6 @@
 name: elegant_toast_example
 description: Example app for elegant_toast package.
-version: 1.0.0
+version: 1.0.5
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

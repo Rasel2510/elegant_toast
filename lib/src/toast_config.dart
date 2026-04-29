@@ -66,6 +66,42 @@ class ToastConfig {
   /// Whether the user can swipe the toast to dismiss it. Default is true.
   final bool swipeToDismiss;
 
+  /// Optional left accent border color.
+  /// When set, replaces the full border with a left-only colored border.
+  /// Useful for card-style toasts like appointment or reminder notifications.
+  ///
+  /// Example:
+  /// ```dart
+  /// ToastConfig(leftBorderColor: Color(0xFFE91E8C))
+  /// ```
+  
+  final Color? leftBorderColor;
+
+  /// Fully custom border — use Flutter's [Border] to style any side.
+  /// When set, overrides [borderColor] and [leftBorderColor].
+  ///
+  /// Examples:
+  /// ```dart
+  /// // Left only
+  /// customBorder: Border(left: BorderSide(color: Colors.pink, width: 4))
+  ///
+  /// // Right only
+  /// customBorder: Border(right: BorderSide(color: Colors.blue, width: 4))
+  ///
+  /// // Top only
+  /// customBorder: Border(top: BorderSide(color: Colors.green, width: 3))
+  ///
+  /// // Left + Right
+  /// customBorder: Border(
+  ///   left: BorderSide(color: Colors.pink, width: 4),
+  ///   right: BorderSide(color: Colors.blue, width: 4),
+  /// )
+  ///
+  /// // All sides custom
+  /// customBorder: Border.all(color: Colors.purple, width: 2)
+  /// ```
+  final Border? customBorder;
+
   /// The entrance/exit animation style. Default is [ToastAnimation.slideAndFade].
   final ToastAnimation animation;
 
@@ -86,6 +122,8 @@ class ToastConfig {
     this.persistent = false,
     this.swipeToDismiss = true,
     this.animation = ToastAnimation.slideAndFade,
+    this.leftBorderColor,
+    this.customBorder
   });
 }
 
@@ -158,3 +196,4 @@ ToastTheme getToastTheme(ToastType type) {
       );
   }
 }
+
