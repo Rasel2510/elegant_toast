@@ -1,3 +1,18 @@
+## 1.0.8
+
+### Visual Redesign — Premium Look
+- New color palette: softer refined backgrounds with improved contrast across all 5 variants
+- Glowing icon: circle now has subtle colored drop-shadow matching the variant accent
+- Layered shadows: two-layer system (colored ambient + neutral key) for realistic depth
+- Refined border: 0.75px border with lighter tones — cleaner, less heavy
+- Premium close button: circular pill background instead of bare icon
+- Polished action button: colored drop shadow on the action pill for tactile feel
+- Better typography: letterSpacing -0.1 on titles, improved line-height on messages
+- Smoother animation: easeOutQuart curve + 420ms duration for fluid entry
+- Rounded progress bar: both ends fully rounded matching container corners
+- Loading toast: rounded spinner cap (StrokeCap.round), improved background
+- Larger maxWidth: raised from 400px to 420px
+
 ## 1.0.7
 
 ### Bug Fixes

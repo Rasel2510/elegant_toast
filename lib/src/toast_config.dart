@@ -139,6 +139,7 @@ class ToastConfig {
 class ToastTheme {
   final Color backgroundColor;
   final Color borderColor;
+  final Color accentColor;
   final Color iconBackground;
   final Color titleColor;
   final Color messageColor;
@@ -147,6 +148,7 @@ class ToastTheme {
   const ToastTheme({
     required this.backgroundColor,
     required this.borderColor,
+    required this.accentColor,
     required this.iconBackground,
     required this.titleColor,
     required this.messageColor,
@@ -159,47 +161,52 @@ ToastTheme getToastTheme(ToastType type) {
   switch (type) {
     case ToastType.success:
       return const ToastTheme(
-        backgroundColor: Color(0xFFEAF3DE),
-        borderColor: Color(0xFF97C459),
-        iconBackground: Color(0xFF639922),
-        titleColor: Color(0xFF3B6D11),
-        messageColor: Color(0xFF3B6D11),
+        backgroundColor: Color(0xFFF4FAF0),
+        borderColor: Color(0xFFD4EDBA),
+        accentColor: Color(0xFF3D9A2B),
+        iconBackground: Color(0xFF3D9A2B),
+        titleColor: Color(0xFF1A3D0F),
+        messageColor: Color(0xFF3A5C2C),
         iconLabel: '✓',
       );
     case ToastType.error:
       return const ToastTheme(
-        backgroundColor: Color(0xFFFCEBEB),
-        borderColor: Color(0xFFF09595),
-        iconBackground: Color(0xFFA32D2D),
-        titleColor: Color(0xFF791F1F),
-        messageColor: Color(0xFF791F1F),
+        backgroundColor: Color(0xFFFFF5F5),
+        borderColor: Color(0xFFFFD5D5),
+        accentColor: Color(0xFFD93025),
+        iconBackground: Color(0xFFD93025),
+        titleColor: Color(0xFF5C0F0A),
+        messageColor: Color(0xFF7A2B26),
         iconLabel: '✕',
       );
     case ToastType.warning:
       return const ToastTheme(
-        backgroundColor: Color(0xFFFAEEDA),
-        borderColor: Color(0xFFEF9F27),
-        iconBackground: Color(0xFFBA7517),
-        titleColor: Color(0xFF854F0B),
-        messageColor: Color(0xFF854F0B),
+        backgroundColor: Color(0xFFFFFBF0),
+        borderColor: Color(0xFFFFE8A3),
+        accentColor: Color(0xFFD97706),
+        iconBackground: Color(0xFFD97706),
+        titleColor: Color(0xFF4D2D00),
+        messageColor: Color(0xFF6B4010),
         iconLabel: '!',
       );
     case ToastType.info:
       return const ToastTheme(
-        backgroundColor: Color(0xFFE6F1FB),
-        borderColor: Color(0xFF85B7EB),
-        iconBackground: Color(0xFF185FA5),
-        titleColor: Color(0xFF0C447C),
-        messageColor: Color(0xFF0C447C),
+        backgroundColor: Color(0xFFF3F8FF),
+        borderColor: Color(0xFFCCDFF8),
+        accentColor: Color(0xFF2563EB),
+        iconBackground: Color(0xFF2563EB),
+        titleColor: Color(0xFF0D2A6B),
+        messageColor: Color(0xFF2B4A82),
         iconLabel: 'i',
       );
     case ToastType.neutral:
       return const ToastTheme(
-        backgroundColor: Color(0xFFF1EFE8),
-        borderColor: Color(0xFFB4B2A9),
-        iconBackground: Color(0xFF5F5E5A),
-        titleColor: Color(0xFF2C2C2A),
-        messageColor: Color(0xFF444441),
+        backgroundColor: Color(0xFFFAFAF9),
+        borderColor: Color(0xFFE5E4E0),
+        accentColor: Color(0xFF6B6B68),
+        iconBackground: Color(0xFF6B6B68),
+        titleColor: Color(0xFF1A1A18),
+        messageColor: Color(0xFF4A4A47),
         iconLabel: '→',
       );
   }
