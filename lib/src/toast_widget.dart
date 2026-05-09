@@ -422,7 +422,7 @@ class _ToastWidgetState extends State<ToastWidget>
         ..scaleByDouble(scale, scale, 1.0, 1.0),
       transformAlignment: isTop ? Alignment.topCenter : Alignment.bottomCenter,
       child: IgnorePointer(
-        ignoring: true,
+        ignoring: true, // only the front toast is interactive
         child: Opacity(
           opacity: 1.0 - (depth * 0.15),
           child: child,
@@ -573,16 +573,30 @@ class _M3ProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
-      builder: (_, __) => LinearProgressIndicator(
-        value: (1.0 - controller.value).clamp(0.0, 1.0),
-        minHeight: 2,
-        backgroundColor: color.withValues(alpha: 0.20),
-        valueColor: AlwaysStoppedAnimation<Color>(color),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-      ),
+      builder: (_, __) {
+        final progress = (1.0 - controller.value).clamp(0.0, 1.0);
+        return ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(28),
+            bottomRight: Radius.circular(28),
+          ),
+          child: SizedBox(
+            height: 2,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Track
+                Container(color: color.withValues(alpha: 0.20)),
+                // Fill — centered, shrinks from both sides
+                FractionallySizedBox(
+                  widthFactor: progress,
+                  child: Container(color: color),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+### Bug Fixes
+- Fixed light mode toasts showing dark colors — light theme variants now use correct saturated backgrounds with light text.
+
 ## 1.1.0
 
 ### New Features

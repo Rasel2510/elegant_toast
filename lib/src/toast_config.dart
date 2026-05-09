@@ -152,10 +152,10 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFF6FCF5A),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF1B2014),
-              borderColor: Color(0xFF2A3A1E),
+              backgroundColor: Color(0xFF1B5E20),
+              borderColor: Color(0xFF2E7D32),
               accentColor: Color(0xFF4CAF50),
-              iconColor: Color(0xFF4CAF50),
+              iconColor: Color(0xFF81C784),
               labelColor: Color(0xFFE8F5E9),
               actionColor: Color(0xFF81C784),
             );
@@ -171,10 +171,10 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFFEF9A9A),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF211414),
-              borderColor: Color(0xFF3A1E1E),
+              backgroundColor: Color(0xFF7F1010),
+              borderColor: Color(0xFFB71C1C),
               accentColor: Color(0xFFE53935),
-              iconColor: Color(0xFFE53935),
+              iconColor: Color(0xFFEF9A9A),
               labelColor: Color(0xFFFFEBEE),
               actionColor: Color(0xFFEF9A9A),
             );
@@ -190,10 +190,10 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFFFFCC80),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF211A0A),
-              borderColor: Color(0xFF3A2E10),
+              backgroundColor: Color(0xFF4E2700),
+              borderColor: Color(0xFFE65100),
               accentColor: Color(0xFFFFA726),
-              iconColor: Color(0xFFFFA726),
+              iconColor: Color(0xFFFFCC80),
               labelColor: Color(0xFFFFF3E0),
               actionColor: Color(0xFFFFCC80),
             );
@@ -209,10 +209,10 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFF90CAF9),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF101922),
-              borderColor: Color(0xFF152B3A),
+              backgroundColor: Color(0xFF0D47A1),
+              borderColor: Color(0xFF1565C0),
               accentColor: Color(0xFF2196F3),
-              iconColor: Color(0xFF2196F3),
+              iconColor: Color(0xFF90CAF9),
               labelColor: Color(0xFFE3F2FD),
               actionColor: Color(0xFF90CAF9),
             );
