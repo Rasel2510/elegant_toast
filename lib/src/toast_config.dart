@@ -97,8 +97,42 @@ class ToastConfig {
   /// When set, overrides [borderColor] and [leftBorderColor].
   final Border? customBorder;
 
+  /// Size of the icon. Default is 22.
+  final double iconSize;
+
+  /// Called when the toast is dismissed (auto or manual).
+  ///
+  /// ```dart
+  /// ToastConfig(
+  ///   onDismiss: () => print('toast gone'),
+  /// )
+  /// ```
+  final VoidCallback? onDismiss;
+
   /// The entrance/exit animation style. Default is [ToastAnimation.slideAndFade].
   final ToastAnimation animation;
+
+  /// If true, a "Show more" button appears on the toast.
+  /// Tapping it expands the toast to show [expandedMessage].
+  /// Default is false.
+  ///
+  /// ```dart
+  /// ToastConfig(
+  ///   expandable: true,
+  ///   expandedMessage: 'Full error details here...',
+  /// )
+  /// ```
+  final bool expandable;
+
+  /// The full content shown when the toast is expanded.
+  /// Only used when [expandable] is true.
+  final String? expandedMessage;
+
+  /// Label for the expand button. Default is 'Show more'.
+  final String expandLabel;
+
+  /// Label for the collapse button. Default is 'Show less'.
+  final String collapseLabel;
 
   const ToastConfig({
     this.backgroundColor,
@@ -123,6 +157,12 @@ class ToastConfig {
     this.leftBorderColor,
     this.customBorder,
     this.animation = ToastAnimation.slideAndFade,
+    this.iconSize = 22,
+    this.onDismiss,
+    this.expandable = false,
+    this.expandedMessage,
+    this.expandLabel = 'Show more',
+    this.collapseLabel = 'Show less',
   });
 }
 
@@ -154,96 +194,96 @@ ToastTheme getToastTheme(ToastType type,
     case ToastType.success:
       return isDark
           ? const ToastTheme(
-              backgroundColor: Color(0xFF1C2B18),
-              borderColor: Color(0xFF2D4A24),
-              accentColor: Color(0xFF6FCF5A),
-              iconColor: Color(0xFF6FCF5A),
-              labelColor: Color(0xFFD4EDBA),
-              actionColor: Color(0xFF6FCF5A),
+              backgroundColor: Color(0xFF0F1F0D),
+              borderColor: Color(0xFF1E3B1A),
+              accentColor: Color(0xFF4ADE80),
+              iconColor: Color(0xFF4ADE80),
+              labelColor: Color(0xFFDCFCE7),
+              actionColor: Color(0xFF4ADE80),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF1B5E20),
-              borderColor: Color(0xFF2E7D32),
-              accentColor: Color(0xFF4CAF50),
-              iconColor: Color(0xFF81C784),
-              labelColor: Color(0xFFE8F5E9),
-              actionColor: Color(0xFF81C784),
+              backgroundColor: Color(0xFFF0FDF4),
+              borderColor: Color(0xFFBBF7D0),
+              accentColor: Color(0xFF16A34A),
+              iconColor: Color(0xFF16A34A),
+              labelColor: Color(0xFF14532D),
+              actionColor: Color(0xFF16A34A),
             );
 
     case ToastType.error:
       return isDark
           ? const ToastTheme(
-              backgroundColor: Color(0xFF2C1A1A),
-              borderColor: Color(0xFF4A2424),
-              accentColor: Color(0xFFEF5350),
-              iconColor: Color(0xFFEF5350),
-              labelColor: Color(0xFFFFCDD2),
-              actionColor: Color(0xFFEF9A9A),
+              backgroundColor: Color(0xFF1C0A0A),
+              borderColor: Color(0xFF3B1212),
+              accentColor: Color(0xFFF87171),
+              iconColor: Color(0xFFF87171),
+              labelColor: Color(0xFFFFE4E6),
+              actionColor: Color(0xFFF87171),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF7F1010),
-              borderColor: Color(0xFFB71C1C),
-              accentColor: Color(0xFFE53935),
-              iconColor: Color(0xFFEF9A9A),
-              labelColor: Color(0xFFFFEBEE),
-              actionColor: Color(0xFFEF9A9A),
+              backgroundColor: Color(0xFFFFF1F2),
+              borderColor: Color(0xFFFFCDD2),
+              accentColor: Color(0xFFDC2626),
+              iconColor: Color(0xFFDC2626),
+              labelColor: Color(0xFF7F1D1D),
+              actionColor: Color(0xFFDC2626),
             );
 
     case ToastType.warning:
       return isDark
           ? const ToastTheme(
-              backgroundColor: Color(0xFF2B2210),
-              borderColor: Color(0xFF4A3A18),
-              accentColor: Color(0xFFFFB74D),
-              iconColor: Color(0xFFFFB74D),
-              labelColor: Color(0xFFFFE0B2),
-              actionColor: Color(0xFFFFCC80),
+              backgroundColor: Color(0xFF1C1500),
+              borderColor: Color(0xFF3B2E00),
+              accentColor: Color(0xFFFBBF24),
+              iconColor: Color(0xFFFBBF24),
+              labelColor: Color(0xFFFEF9C3),
+              actionColor: Color(0xFFFBBF24),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF4E2700),
-              borderColor: Color(0xFFE65100),
-              accentColor: Color(0xFFFFA726),
-              iconColor: Color(0xFFFFCC80),
-              labelColor: Color(0xFFFFF3E0),
-              actionColor: Color(0xFFFFCC80),
+              backgroundColor: Color(0xFFFFFBEB),
+              borderColor: Color(0xFFFDE68A),
+              accentColor: Color(0xFFD97706),
+              iconColor: Color(0xFFD97706),
+              labelColor: Color(0xFF78350F),
+              actionColor: Color(0xFFD97706),
             );
 
     case ToastType.info:
       return isDark
           ? const ToastTheme(
-              backgroundColor: Color(0xFF182230),
-              borderColor: Color(0xFF1E3A52),
-              accentColor: Color(0xFF64B5F6),
-              iconColor: Color(0xFF64B5F6),
-              labelColor: Color(0xFFBBDEFB),
-              actionColor: Color(0xFF90CAF9),
+              backgroundColor: Color(0xFF080F1C),
+              borderColor: Color(0xFF0F2040),
+              accentColor: Color(0xFF60A5FA),
+              iconColor: Color(0xFF60A5FA),
+              labelColor: Color(0xFFDBEAFE),
+              actionColor: Color(0xFF60A5FA),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF0D47A1),
-              borderColor: Color(0xFF1565C0),
-              accentColor: Color(0xFF2196F3),
-              iconColor: Color(0xFF90CAF9),
-              labelColor: Color(0xFFE3F2FD),
-              actionColor: Color(0xFF90CAF9),
+              backgroundColor: Color(0xFFEFF6FF),
+              borderColor: Color(0xFFBFDBFE),
+              accentColor: Color(0xFF2563EB),
+              iconColor: Color(0xFF2563EB),
+              labelColor: Color(0xFF1E3A5F),
+              actionColor: Color(0xFF2563EB),
             );
 
     case ToastType.neutral:
       return isDark
           ? const ToastTheme(
-              backgroundColor: Color(0xFF2B2B2E),
-              borderColor: Color(0xFF3A3A3D),
-              accentColor: Color(0xFFCAC4D0),
-              iconColor: Color(0xFFCAC4D0),
-              labelColor: Color(0xFFE6E1E5),
-              actionColor: Color(0xFFD0BCFF),
+              backgroundColor: Color(0xFF18181B),
+              borderColor: Color(0xFF27272A),
+              accentColor: Color(0xFFC4B5FD),
+              iconColor: Color(0xFFA1A1AA),
+              labelColor: Color(0xFFF4F4F5),
+              actionColor: Color(0xFFC4B5FD),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF1C1B1F),
-              borderColor: Color(0xFF2C2B2F),
-              accentColor: Color(0xFFCAC4D0),
-              iconColor: Color(0xFFCAC4D0),
-              labelColor: Color(0xFFE6E1E5),
-              actionColor: Color(0xFFD0BCFF),
+              backgroundColor: Color(0xFFFAFAFA),
+              borderColor: Color(0xFFE4E4E7),
+              accentColor: Color(0xFF7C3AED),
+              iconColor: Color(0xFF52525B),
+              labelColor: Color(0xFF18181B),
+              actionColor: Color(0xFF7C3AED),
             );
   }
 }

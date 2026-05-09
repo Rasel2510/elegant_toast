@@ -1,6 +1,16 @@
 # Changelog
 
+## 1.1.3
+
+### New Features
+- Added `expandable` toast — set `expandable: true` and `expandedMessage` to show 
+  a "Show more" button that animates open with full content
+- Added `onDismiss` callback — called when toast is dismissed (auto, manual, or swipe)
+- Added `iconSize` — customize the icon size (default 22)
+
 ## 1.1.2
+
+### New Features
 - Added `pauseOnHold` — long pressing the toast pauses the progress bar countdown
 
 ## 1.1.1

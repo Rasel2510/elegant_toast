@@ -3,6 +3,13 @@ import 'toast_type.dart';
 import 'toast_position.dart';
 import 'toast_config.dart';
 import 'toast_animation.dart';
+import 'widgets/toast_curve.dart';
+import 'widgets/toast_icon.dart';
+import 'widgets/toast_close_button.dart';
+import 'widgets/toast_action_button.dart';
+import 'widgets/toast_progress_bar.dart';
+
+export 'widgets/toast_loading_widget.dart';
 
 /// Internal widget that renders the Android Material 3 style toast.
 class ToastWidget extends StatefulWidget {
@@ -77,7 +84,7 @@ class _ToastWidgetState extends State<ToastWidget>
       parent: _enterController,
       curve: widget.config.animation == ToastAnimation.bounce
           ? Curves.elasticOut
-          : const _M3Curve(),
+          : const ToastCurve(),
     ));
 
     _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
@@ -310,7 +317,7 @@ class _ToastWidgetState extends State<ToastWidget>
                                     // Icon
                                     if (config.showIcon) ...[
                                       config.icon ??
-                                          _M3Icon(
+                                          ToastIcon(
                                             type: widget.type,
                                             color: iconColor,
                                           ),
@@ -362,7 +369,7 @@ class _ToastWidgetState extends State<ToastWidget>
                                     // Action
                                     if (config.action != null) ...[
                                       const SizedBox(width: 8),
-                                      _M3ActionButton(
+                                      ToastActionButton(
                                         label: config.action!.label,
                                         labelStyle: config.action!.labelStyle,
                                         color: actionColor,
@@ -376,7 +383,7 @@ class _ToastWidgetState extends State<ToastWidget>
                                     // Close
                                     if (config.showCloseButton) ...[
                                       const SizedBox(width: 4),
-                                      _M3CloseButton(
+                                      ToastCloseButton(
                                         color: labelColor,
                                         onTap: _animatedDismiss,
                                       ),
@@ -387,7 +394,7 @@ class _ToastWidgetState extends State<ToastWidget>
 
                               // ── Progress bar ──
                               if (config.showProgressBar && !config.persistent)
-                                _M3ProgressBar(
+                                ToastProgressBar(
                                   controller: _progressController,
                                   color: progressColor,
                                 ),
@@ -426,354 +433,6 @@ class _ToastWidgetState extends State<ToastWidget>
         child: Opacity(
           opacity: 1.0 - (depth * 0.15),
           child: child,
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Custom M3 decelerate curve
-// ─────────────────────────────────────────────────────────────
-class _M3Curve extends Curve {
-  const _M3Curve();
-  @override
-  double transformInternal(double t) => 1 - (1 - t) * (1 - t) * (1 - t);
-}
-
-// ─────────────────────────────────────────────────────────────
-// Material 3 icon
-// ─────────────────────────────────────────────────────────────
-class _M3Icon extends StatelessWidget {
-  final ToastType type;
-  final Color color;
-
-  const _M3Icon({required this.type, required this.color});
-
-  IconData get _icon => switch (type) {
-        ToastType.success => Icons.check_circle_rounded,
-        ToastType.error => Icons.error_rounded,
-        ToastType.warning => Icons.warning_rounded,
-        ToastType.info => Icons.info_rounded,
-        ToastType.neutral => Icons.notifications_rounded,
-      };
-
-  @override
-  Widget build(BuildContext context) => Icon(_icon, color: color, size: 22);
-}
-
-// ─────────────────────────────────────────────────────────────
-// M3 action — text button with press ripple
-// ─────────────────────────────────────────────────────────────
-class _M3ActionButton extends StatefulWidget {
-  final String label;
-  final TextStyle? labelStyle;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _M3ActionButton({
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.labelStyle,
-  });
-
-  @override
-  State<_M3ActionButton> createState() => _M3ActionButtonState();
-}
-
-class _M3ActionButtonState extends State<_M3ActionButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 80),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: _pressed
-              ? widget.color.withValues(alpha: 0.15)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          widget.label.toUpperCase(),
-          style: widget.labelStyle ??
-              TextStyle(
-                color: widget.color,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.8,
-              ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// M3 close — icon button with press state
-// ─────────────────────────────────────────────────────────────
-class _M3CloseButton extends StatefulWidget {
-  final Color color;
-  final VoidCallback onTap;
-
-  const _M3CloseButton({required this.color, required this.onTap});
-
-  @override
-  State<_M3CloseButton> createState() => _M3CloseButtonState();
-}
-
-class _M3CloseButtonState extends State<_M3CloseButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 80),
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: _pressed
-              ? widget.color.withValues(alpha: 0.14)
-              : Colors.transparent,
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.close_rounded,
-          size: 18,
-          color: widget.color.withValues(alpha: 0.70),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// M3 progress bar
-// ─────────────────────────────────────────────────────────────
-class _M3ProgressBar extends StatelessWidget {
-  final AnimationController controller;
-  final Color color;
-
-  const _M3ProgressBar({required this.controller, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (_, __) {
-        final progress = (1.0 - controller.value).clamp(0.0, 1.0);
-        return ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16),
-          ),
-          child: SizedBox(
-            height: 2,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Track
-                Container(color: color.withValues(alpha: 0.20)),
-                // Fill — centered, shrinks from both sides
-                FractionallySizedBox(
-                  widthFactor: progress,
-                  child: Container(color: color),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Loading toast — M3 style with dark mode support
-// ─────────────────────────────────────────────────────────────
-class LoadingToastWidget extends StatefulWidget {
-  final String title;
-  final String? message;
-  final ToastPosition position;
-  final Color? spinnerColor;
-
-  const LoadingToastWidget({
-    super.key,
-    required this.title,
-    this.message,
-    required this.position,
-    this.spinnerColor,
-  });
-
-  @override
-  State<LoadingToastWidget> createState() => _LoadingToastWidgetState();
-}
-
-class _LoadingToastWidgetState extends State<LoadingToastWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _fade;
-  late Animation<Offset> _slide;
-
-  bool get _isTop =>
-      widget.position == ToastPosition.top ||
-      widget.position == ToastPosition.topLeft ||
-      widget.position == ToastPosition.topRight;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 320));
-    _fade = Tween<double>(begin: 0.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-    _slide = Tween<Offset>(
-      begin: Offset(0, _isTop ? -0.6 : 0.6),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: const _M3Curve()));
-    _ctrl.forward();
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  AlignmentGeometry get _alignment {
-    switch (widget.position) {
-      case ToastPosition.top:
-        return Alignment.topCenter;
-      case ToastPosition.topRight:
-        return Alignment.topRight;
-      case ToastPosition.topLeft:
-        return Alignment.topLeft;
-      case ToastPosition.bottom:
-        return Alignment.bottomCenter;
-      case ToastPosition.bottomRight:
-        return Alignment.bottomRight;
-      case ToastPosition.bottomLeft:
-        return Alignment.bottomLeft;
-    }
-  }
-
-  EdgeInsets get _padding {
-    final isTop = _isTop;
-    final isLeft = widget.position == ToastPosition.topLeft ||
-        widget.position == ToastPosition.bottomLeft;
-    final isRight = widget.position == ToastPosition.topRight ||
-        widget.position == ToastPosition.bottomRight;
-    final isCenter = widget.position == ToastPosition.top ||
-        widget.position == ToastPosition.bottom;
-    return EdgeInsets.only(
-      top: isTop ? 52 : 0,
-      bottom: isTop ? 0 : 52,
-      left: isLeft ? 16 : (isCenter ? 16 : 0),
-      right: isRight ? 16 : (isCenter ? 16 : 0),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final bg = isDark ? const Color(0xFF2B2B2E) : const Color(0xFF1C1B1F);
-    final label = isDark ? const Color(0xFFE6E1E5) : const Color(0xFFECE6F0);
-    final subtext = isDark ? const Color(0xFFCAC4D0) : const Color(0xFFB0A8B9);
-    final spinner = widget.spinnerColor ??
-        (isDark ? const Color(0xFF80CBC4) : const Color(0xFF4DB6AC));
-
-    return Material(
-      color: Colors.transparent,
-      child: Align(
-        alignment: _alignment,
-        child: Padding(
-          padding: _padding,
-          child: FadeTransition(
-            opacity: _fade,
-            child: SlideTransition(
-              position: _slide,
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 288, maxWidth: 560),
-                decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.22),
-                        blurRadius: 20,
-                        offset: const Offset(0, 6)),
-                    BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2)),
-                  ],
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        strokeCap: StrokeCap.round,
-                        valueColor: AlwaysStoppedAnimation<Color>(spinner),
-                        backgroundColor: spinner.withValues(alpha: 0.20),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            widget.title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: label,
-                              letterSpacing: 0.1,
-                              height: 1.4,
-                            ),
-                          ),
-                          if (widget.message != null &&
-                              widget.message!.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.message!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: subtext,
-                                height: 1.5,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ),
       ),
     );
