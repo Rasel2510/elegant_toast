@@ -278,7 +278,7 @@ class _ToastWidgetState extends State<ToastWidget>
                         decoration: BoxDecoration(
                           color: bgColor,
                           borderRadius:
-                              config.borderRadius ?? BorderRadius.circular(28),
+                              config.borderRadius ?? BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.22),
@@ -294,7 +294,7 @@ class _ToastWidgetState extends State<ToastWidget>
                         ),
                         child: ClipRRect(
                           borderRadius:
-                              config.borderRadius ?? BorderRadius.circular(28),
+                              config.borderRadius ?? BorderRadius.circular(16),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -577,8 +577,8 @@ class _M3ProgressBar extends StatelessWidget {
         final progress = (1.0 - controller.value).clamp(0.0, 1.0);
         return ClipRRect(
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(28),
-            bottomRight: Radius.circular(28),
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16),
           ),
           child: SizedBox(
             height: 2,
@@ -710,7 +710,7 @@ class _LoadingToastWidgetState extends State<LoadingToastWidget>
                 constraints: const BoxConstraints(minWidth: 288, maxWidth: 560),
                 decoration: BoxDecoration(
                   color: bg,
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
                         color: Colors.black.withValues(alpha: 0.22),

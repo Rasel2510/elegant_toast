@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.2
+- Added `pauseOnHold` — long pressing the toast pauses the progress bar countdown
+
 ## 1.1.1
 
 ### Bug Fixes
