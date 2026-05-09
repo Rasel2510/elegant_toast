@@ -109,6 +109,15 @@ class ToastConfig {
   /// ```
   final VoidCallback? onDismiss;
 
+  /// If true, triggers haptic feedback when the toast appears.
+  /// Intensity varies by type: error = heavy, warning = medium, others = light.
+  /// Default is false.
+  ///
+  /// ```dart
+  /// ToastConfig(hapticFeedback: true)
+  /// ```
+  final bool hapticFeedback;
+
   /// The entrance/exit animation style. Default is [ToastAnimation.slideAndFade].
   final ToastAnimation animation;
 
@@ -156,6 +165,7 @@ class ToastConfig {
     this.onTap,
     this.leftBorderColor,
     this.customBorder,
+    this.hapticFeedback = false,
     this.animation = ToastAnimation.slideAndFade,
     this.iconSize = 22,
     this.onDismiss,

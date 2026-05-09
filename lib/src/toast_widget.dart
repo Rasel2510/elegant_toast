@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'toast_type.dart';
 import 'toast_position.dart';
 import 'toast_config.dart';
@@ -52,9 +53,9 @@ class _ToastWidgetState extends State<ToastWidget>
   late Animation<double> _exitFade;
   late Animation<Offset> _exitSlide;
 
-  // Swipe state
   double _dragOffset = 0;
   bool _isDismissing = false;
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -91,7 +92,6 @@ class _ToastWidgetState extends State<ToastWidget>
       CurvedAnimation(parent: _enterController, curve: Curves.easeOutBack),
     );
 
-    // Exit: slides back the direction it came from
     _exitFade = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _exitController, curve: Curves.easeIn),
     );
@@ -103,6 +103,19 @@ class _ToastWidgetState extends State<ToastWidget>
     );
 
     _enterController.forward();
+
+    if (widget.config.hapticFeedback) {
+      switch (widget.type) {
+        case ToastType.error:
+          HapticFeedback.heavyImpact();
+          break;
+        case ToastType.warning:
+          HapticFeedback.mediumImpact();
+          break;
+        default:
+          HapticFeedback.lightImpact();
+      }
+    }
 
     if (!widget.config.persistent && widget.config.showProgressBar) {
       _progressController.forward();
@@ -122,15 +135,16 @@ class _ToastWidgetState extends State<ToastWidget>
     super.dispose();
   }
 
-  /// Plays the vertical exit animation then calls onDismiss.
+  // ── Dismiss ──────────────────────────────────────────────────────
+
   Future<void> _animatedDismiss() async {
     if (_isDismissing) return;
     _isDismissing = true;
     await _exitController.forward();
+    widget.config.onDismiss?.call();
     widget.onDismiss();
   }
 
-  /// Plays a horizontal swipe-out animation then calls onDismiss.
   Future<void> _swipeDismiss(double targetX) async {
     if (_isDismissing) return;
     _isDismissing = true;
@@ -140,23 +154,82 @@ class _ToastWidgetState extends State<ToastWidget>
       duration: const Duration(milliseconds: 220),
     );
 
-    final swipeAnim = Tween<double>(
-      begin: _dragOffset,
-      end: targetX,
-    ).animate(CurvedAnimation(parent: swipeController, curve: Curves.easeOut));
+    final swipeAnim = Tween<double>(begin: _dragOffset, end: targetX).animate(
+      CurvedAnimation(parent: swipeController, curve: Curves.easeOut),
+    );
 
     swipeAnim.addListener(() {
       if (mounted) setState(() => _dragOffset = swipeAnim.value);
     });
 
-    // Apply fade via the exit controller in parallel
     _exitController.animateTo(1.0,
         duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
 
     await swipeController.forward();
     swipeController.dispose();
+    widget.config.onDismiss?.call();
     widget.onDismiss();
   }
+
+  // ── Gestures ─────────────────────────────────────────────────────
+
+  void _handleLongPressStart(LongPressStartDetails _) {
+    if (!widget.config.pauseOnHold || _isDismissing) return;
+    if (widget.config.showProgressBar && !widget.config.persistent) {
+      _progressController.stop();
+    }
+  }
+
+  void _handleLongPressEnd(LongPressEndDetails _) {
+    if (!widget.config.pauseOnHold || _isDismissing) return;
+    if (widget.config.showProgressBar &&
+        !widget.config.persistent &&
+        !_isExpanded) {
+      _progressController.forward();
+    }
+  }
+
+  void _toggleExpand() {
+    if (!widget.config.expandable || widget.config.expandedMessage == null)
+      return;
+    setState(() => _isExpanded = !_isExpanded);
+    if (widget.config.showProgressBar && !widget.config.persistent) {
+      _isExpanded ? _progressController.stop() : _progressController.forward();
+    }
+  }
+
+  void _handleDragUpdate(DragUpdateDetails d) {
+    if (!widget.config.swipeToDismiss || _isDismissing) return;
+    setState(() => _dragOffset += d.delta.dx);
+  }
+
+  void _handleDragEnd(DragEndDetails d) {
+    if (!widget.config.swipeToDismiss || _isDismissing) return;
+    final velocity = d.primaryVelocity ?? 0;
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (_dragOffset.abs() > 80 || velocity.abs() > 600) {
+      final targetX = _dragOffset > 0 ? screenWidth : -screenWidth;
+      _swipeDismiss(targetX);
+    } else {
+      _snapBack();
+    }
+  }
+
+  void _snapBack() {
+    final snapController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    final snapAnim = Tween<double>(begin: _dragOffset, end: 0.0).animate(
+      CurvedAnimation(parent: snapController, curve: Curves.elasticOut),
+    );
+    snapAnim.addListener(() {
+      if (mounted) setState(() => _dragOffset = snapAnim.value);
+    });
+    snapController.forward().then((_) => snapController.dispose());
+  }
+
+  // ── Position helpers ─────────────────────────────────────────────
 
   AlignmentGeometry get _alignment {
     switch (widget.position) {
@@ -191,6 +264,8 @@ class _ToastWidgetState extends State<ToastWidget>
     );
   }
 
+  // ── Animation builders ───────────────────────────────────────────
+
   Widget _buildAnimated(Widget child) {
     final entered = switch (widget.config.animation) {
       ToastAnimation.fade =>
@@ -205,214 +280,12 @@ class _ToastWidgetState extends State<ToastWidget>
         ),
     };
 
-    // Wrap with exit (vertical slide + fade)
     return FadeTransition(
       opacity: _exitFade,
       child: SlideTransition(position: _exitSlide, child: entered),
     );
   }
 
-  void _handleDragUpdate(DragUpdateDetails d) {
-    if (!widget.config.swipeToDismiss || _isDismissing) return;
-    setState(() => _dragOffset += d.delta.dx);
-  }
-
-  void _handleDragEnd(DragEndDetails d) {
-    if (!widget.config.swipeToDismiss || _isDismissing) return;
-
-    final velocity = d.primaryVelocity ?? 0;
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Dismiss if dragged far enough OR flicked fast enough
-    if (_dragOffset.abs() > 80 || velocity.abs() > 600) {
-      // Fly off in the direction of the drag
-      final targetX = _dragOffset > 0 ? screenWidth : -screenWidth;
-      _swipeDismiss(targetX);
-    } else {
-      // Spring back to center
-      _snapBack();
-    }
-  }
-
-  void _snapBack() {
-    final snapController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    final snapAnim = Tween<double>(begin: _dragOffset, end: 0.0).animate(
-      CurvedAnimation(parent: snapController, curve: Curves.elasticOut),
-    );
-    snapAnim.addListener(() {
-      if (mounted) setState(() => _dragOffset = snapAnim.value);
-    });
-    snapController.forward().then((_) => snapController.dispose());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final theme = getToastTheme(widget.type, brightness: brightness);
-    final config = widget.config;
-
-    final bgColor = config.backgroundColor ?? theme.backgroundColor;
-    final iconColor = config.iconBackgroundColor ?? theme.iconColor;
-    final labelColor = theme.labelColor;
-    final actionColor = theme.actionColor;
-    final progressColor = config.progressBarColor ?? theme.accentColor;
-
-    return Material(
-        color: Colors.transparent,
-        child: Align(
-          alignment: _alignment,
-          child: Padding(
-            padding: _screenPadding,
-            child: _buildStackTransform(
-              _buildAnimated(
-                GestureDetector(
-                  onHorizontalDragUpdate: _handleDragUpdate,
-                  onHorizontalDragEnd: _handleDragEnd,
-                  onTap: config.onTap,
-                  child: Transform.translate(
-                    offset: Offset(_dragOffset, 0),
-                    child: Opacity(
-                      // Fade out as user drags, fully gone at 180px
-                      opacity: (1 - (_dragOffset.abs() / 180)).clamp(0.0, 1.0),
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          minWidth: 288,
-                          maxWidth: 560,
-                        ),
-                        decoration: BoxDecoration(
-                          color: bgColor,
-                          borderRadius:
-                              config.borderRadius ?? BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.22),
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius:
-                              config.borderRadius ?? BorderRadius.circular(16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // ── Content ──
-                              Padding(
-                                padding: config.padding ??
-                                    const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 14),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // Icon
-                                    if (config.showIcon) ...[
-                                      config.icon ??
-                                          ToastIcon(
-                                            type: widget.type,
-                                            color: iconColor,
-                                          ),
-                                      const SizedBox(width: 12),
-                                    ],
-
-                                    // Title + message
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            widget.title,
-                                            style: config.titleStyle ??
-                                                TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: labelColor,
-                                                  letterSpacing: 0.1,
-                                                  height: 1.4,
-                                                ),
-                                          ),
-                                          if (widget.message != null &&
-                                              widget.message!.isNotEmpty) ...[
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              widget.message!,
-                                              maxLines: config.maxLines,
-                                              overflow: config.maxLines != null
-                                                  ? TextOverflow.ellipsis
-                                                  : null,
-                                              style: config.messageStyle ??
-                                                  TextStyle(
-                                                    fontSize: 12,
-                                                    color:
-                                                        labelColor.withValues(
-                                                            alpha: 0.70),
-                                                    height: 1.5,
-                                                    letterSpacing: 0.2,
-                                                  ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-
-                                    // Action
-                                    if (config.action != null) ...[
-                                      const SizedBox(width: 8),
-                                      ToastActionButton(
-                                        label: config.action!.label,
-                                        labelStyle: config.action!.labelStyle,
-                                        color: actionColor,
-                                        onTap: () {
-                                          config.action!.onPressed();
-                                          _animatedDismiss();
-                                        },
-                                      ),
-                                    ],
-
-                                    // Close
-                                    if (config.showCloseButton) ...[
-                                      const SizedBox(width: 4),
-                                      ToastCloseButton(
-                                        color: labelColor,
-                                        onTap: _animatedDismiss,
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-
-                              // ── Progress bar ──
-                              if (config.showProgressBar && !config.persistent)
-                                ToastProgressBar(
-                                  controller: _progressController,
-                                  color: progressColor,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ));
-  }
-
-  /// Applies scale + vertical offset for the stacked card effect.
-  /// stackIndex 0 = front (newest), 1 = middle, 2 = back (oldest).
   Widget _buildStackTransform(Widget child) {
     if (widget.stackIndex == 0) return child;
 
@@ -429,10 +302,212 @@ class _ToastWidgetState extends State<ToastWidget>
         ..scaleByDouble(scale, scale, 1.0, 1.0),
       transformAlignment: isTop ? Alignment.topCenter : Alignment.bottomCenter,
       child: IgnorePointer(
-        ignoring: true, // only the front toast is interactive
+        ignoring: true,
         child: Opacity(
           opacity: 1.0 - (depth * 0.15),
           child: child,
+        ),
+      ),
+    );
+  }
+
+  // ── Content builders ─────────────────────────────────────────────
+
+  Widget _buildTextColumn(
+      Color labelColor, Color actionColor, ToastConfig config) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.title,
+          style: config.titleStyle ??
+              TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: labelColor,
+                letterSpacing: 0.1,
+                height: 1.4,
+              ),
+        ),
+        if (widget.message != null && widget.message!.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            widget.message!,
+            maxLines: config.maxLines,
+            overflow: config.maxLines != null ? TextOverflow.ellipsis : null,
+            style: config.messageStyle ??
+                TextStyle(
+                  fontSize: 12,
+                  color: labelColor.withValues(alpha: 0.70),
+                  height: 1.5,
+                  letterSpacing: 0.2,
+                ),
+          ),
+        ],
+        if (config.expandable &&
+            config.expandedMessage != null &&
+            _isExpanded) ...[
+          const SizedBox(height: 6),
+          Text(
+            config.expandedMessage!,
+            style: config.messageStyle ??
+                TextStyle(
+                  fontSize: 12,
+                  color: labelColor.withValues(alpha: 0.70),
+                  height: 1.5,
+                  letterSpacing: 0.2,
+                ),
+          ),
+        ],
+        if (config.expandable && config.expandedMessage != null) ...[
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: _toggleExpand,
+            child: Text(
+              _isExpanded ? config.collapseLabel : config.expandLabel,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: actionColor,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildContentRow(Color iconColor, Color labelColor, Color actionColor,
+      ToastConfig config) {
+    return Padding(
+      padding: config.padding ??
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (config.showIcon) ...[
+            config.icon ??
+                ToastIcon(
+                  type: widget.type,
+                  color: iconColor,
+                  size: config.iconSize,
+                ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: _buildTextColumn(labelColor, actionColor, config),
+          ),
+          if (config.action != null) ...[
+            const SizedBox(width: 8),
+            ToastActionButton(
+              label: config.action!.label,
+              labelStyle: config.action!.labelStyle,
+              color: actionColor,
+              onTap: () {
+                config.action!.onPressed();
+                _animatedDismiss();
+              },
+            ),
+          ],
+          if (config.showCloseButton) ...[
+            const SizedBox(width: 4),
+            ToastCloseButton(
+              color: labelColor,
+              onTap: _animatedDismiss,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToastBody(Color bgColor, Color iconColor, Color labelColor,
+      Color actionColor, Color progressColor, ToastConfig config) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 288, maxWidth: 560),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: config.borderRadius ?? BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: config.borderRadius ?? BorderRadius.circular(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildContentRow(iconColor, labelColor, actionColor, config),
+            if (config.showProgressBar && !config.persistent)
+              ToastProgressBar(
+                controller: _progressController,
+                color: progressColor,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Build ────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final theme = getToastTheme(widget.type, brightness: brightness);
+    final config = widget.config;
+
+    final bgColor = config.backgroundColor ?? theme.backgroundColor;
+    final iconColor = config.iconBackgroundColor ?? theme.iconColor;
+    final labelColor = theme.labelColor;
+    final actionColor = theme.actionColor;
+    final progressColor = config.progressBarColor ?? theme.accentColor;
+
+    return Material(
+      color: Colors.transparent,
+      child: Align(
+        alignment: _alignment,
+        child: Padding(
+          padding: _screenPadding,
+          child: _buildStackTransform(
+            _buildAnimated(
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragUpdate: _handleDragUpdate,
+                onHorizontalDragEnd: _handleDragEnd,
+                onLongPressStart: _handleLongPressStart,
+                onLongPressEnd: _handleLongPressEnd,
+                onLongPressMoveUpdate: (_) {},
+                onTap: config.onTap,
+                child: Transform.translate(
+                  offset: Offset(_dragOffset, 0),
+                  child: Opacity(
+                    opacity: (1 - (_dragOffset.abs() / 180)).clamp(0.0, 1.0),
+                    child: _buildToastBody(
+                      bgColor,
+                      iconColor,
+                      labelColor,
+                      actionColor,
+                      progressColor,
+                      config,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

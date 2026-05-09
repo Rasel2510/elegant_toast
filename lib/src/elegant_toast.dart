@@ -49,7 +49,20 @@ class ElegantToast {
   ElegantToast._();
 
   // ── Stack (max 3 toasts visible at once) ──────────────────────────
-  static const int _maxStack = 3;
+  static int _maxStack = 3;
+
+  /// Maximum number of toasts visible at once. Default is 3.
+  /// Set before showing toasts.
+  ///
+  /// ```dart
+  /// ElegantToast.maxStack = 5;
+  /// ```
+  static set maxStack(int value) {
+    assert(value > 0, 'maxStack must be greater than 0');
+    _maxStack = value;
+  }
+
+  static int get maxStack => _maxStack;
   static final List<_StackEntry> _stack = [];
 
   // ── Generation token (prevents stale timers) ──────────────────────

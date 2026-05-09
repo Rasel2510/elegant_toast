@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.4
+
+### New Features
+- Added `maxStack` — customize max visible toasts (default 3) via `ElegantToast.maxStack = 5`
+- Added `hapticFeedback` — triggers device vibration on toast appear; intensity varies by type.
+
 ## 1.1.3
 
 ### New Features

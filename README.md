@@ -1,23 +1,28 @@
 # elegant_toast
 
-[![pub version](https://img.shields.io/badge/pub-1.1.3-blue)](https://pub.dev/packages/elegant_toast)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![pub version](https://img.shields.io/badge/pub-1.1.4-blue)](https://pub.dev/packages/elegant_toast)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)](https://flutter.dev)
 
-A beautiful, customizable Flutter toast notification package.
+A beautiful, customizable Flutter toast notification package with dark/light mode support.
 
 ---
 
 ## Features
 
 - ✅ 5 built-in variants — `success`, `error`, `warning`, `info`, `neutral`
+- ✅ **Automatic dark/light mode** — follows your app's theme brightness
 - ✅ Progress bar with countdown timer
+- ✅ **Pause on hold** — long press pauses the progress bar countdown
+- ✅ **Expandable toast** — "Show more" button reveals full content
 - ✅ Action buttons — Undo, Retry, View, or any custom label
+- ✅ `onDismiss` callback — called when toast disappears
+- ✅ `onTap` — tap anywhere on the toast to trigger a callback
+- ✅ `iconSize` — customize the icon size
 - ✅ Toast queue — multiple toasts show one after another
 - ✅ Swipe to dismiss
 - ✅ Persistent toast — no auto-dismiss
 - ✅ Loading toast — shows spinner, converts to success/error
-- ✅ `onTap` — tap anywhere on the toast to trigger a callback
 - ✅ `showIcon: false` — simple text-only toast
 - ✅ `maxLines` — limit message lines with ellipsis
 - ✅ Left border accent — `leftBorderColor`
@@ -33,7 +38,7 @@ A beautiful, customizable Flutter toast notification package.
 
 ```yaml
 dependencies:
-  elegant_toast: ^1.1.3
+  elegant_toast: ^1.1.4
 ```
 
 ---
@@ -43,6 +48,9 @@ dependencies:
 ```dart
 MaterialApp(
   navigatorKey: ElegantToast.navigatorKey,
+  theme: ThemeData.light(),
+  darkTheme: ThemeData.dark(),
+  themeMode: ThemeMode.system, // toast follows system dark/light
   home: MyHomePage(),
 )
 
@@ -64,43 +72,16 @@ ElegantToast.showNeutral(title: 'Copied to clipboard');
 
 ---
 
-## onTap — Tap anywhere on toast
+## Dark / Light Mode
+
+Toast colors automatically adapt to your app's theme brightness. No extra setup needed — just configure your `MaterialApp` with both `theme` and `darkTheme`:
 
 ```dart
-ElegantToast.showInfo(
-  title: 'New message received',
-  message: 'Tap to open inbox.',
-  config: ToastConfig(
-    onTap: () => Navigator.pushNamed(context, '/inbox'),
-  ),
-);
-```
-
----
-
-## showIcon: false — Text-only toast
-
-```dart
-ElegantToast.showSuccess(
-  title: 'Done!',
-  config: const ToastConfig(
-    showIcon: false,
-  ),
-);
-```
-
----
-
-## maxLines — Limit message lines
-
-```dart
-ElegantToast.showInfo(
-  title: 'Long message',
-  message: 'This is a very long message that should be truncated after 2 lines.',
-  config: const ToastConfig(
-    maxLines: 2,
-  ),
-);
+MaterialApp(
+  theme: ThemeData.light(),
+  darkTheme: ThemeData.dark(),
+  themeMode: ThemeMode.system, // or .dark / .light
+)
 ```
 
 ---
@@ -119,6 +100,69 @@ ElegantToast.showSuccess(
 
 ---
 
+## Pause on Hold
+
+Long pressing the toast pauses the progress bar countdown. Releasing resumes it. Enabled by default when `showProgressBar` is true.
+
+```dart
+ElegantToast.showSuccess(
+  title: 'Hold to pause',
+  config: const ToastConfig(
+    showProgressBar: true,
+    pauseOnHold: true, // default is true
+  ),
+);
+```
+
+---
+
+## Expandable Toast
+
+Show a "Show more" button that reveals full content when tapped. Progress bar pauses while expanded.
+
+```dart
+ElegantToast.showError(
+  title: 'Upload failed',
+  message: 'Tap show more for details.',
+  config: ToastConfig(
+    expandable: true,
+    expandedMessage: 'Connection timed out after 30s. Check your network and try again.',
+    expandLabel: 'Show more',   // optional, default
+    collapseLabel: 'Show less', // optional, default
+  ),
+);
+```
+
+---
+
+## onDismiss Callback
+
+Called when the toast disappears — whether auto-dismissed, manually closed, or swiped away.
+
+```dart
+ElegantToast.showSuccess(
+  title: 'Profile saved!',
+  config: ToastConfig(
+    onDismiss: () => Navigator.pushNamed(context, '/home'),
+  ),
+);
+```
+
+---
+
+## Icon Size
+
+```dart
+ElegantToast.showSuccess(
+  title: 'Done!',
+  config: const ToastConfig(
+    iconSize: 28, // default is 22
+  ),
+);
+```
+
+---
+
 ## Action Button
 
 ```dart
@@ -131,6 +175,20 @@ ElegantToast.showNeutral(
       label: 'Undo',
       onPressed: () => restoreItem(),
     ),
+  ),
+);
+```
+
+---
+
+## onTap
+
+```dart
+ElegantToast.showInfo(
+  title: 'New message received',
+  message: 'Tap to open inbox.',
+  config: ToastConfig(
+    onTap: () => Navigator.pushNamed(context, '/inbox'),
   ),
 );
 ```
@@ -159,12 +217,26 @@ ElegantToast.completeLoading(type: ToastType.success, title: 'Uploaded!');
 
 ---
 
+## Persistent Toast
+
+```dart
+ElegantToast.showWarning(
+  title: 'Action required',
+  config: const ToastConfig(persistent: true),
+);
+
+ElegantToast.dismiss(); // dismiss programmatically
+ElegantToast.clearAll(); // dismiss all
+```
+
+---
+
 ## Left Border Accent
 
 ```dart
 ElegantToast.showNeutral(
   title: 'Dentist Appointment',
-  message: '4:00 PM - 5:00 PM\nDental Clinic',
+  message: '4:00 PM - 5:00 PM',
   config: ToastConfig(
     leftBorderColor: Color(0xFFE91E8C),
     backgroundColor: Color(0xFFFFF0F5),
@@ -174,7 +246,7 @@ ElegantToast.showNeutral(
 
 ---
 
-## Custom Border (any side)
+## Custom Border
 
 ```dart
 // Right border
@@ -189,14 +261,6 @@ ToastConfig(
   customBorder: Border(
     top: BorderSide(color: Colors.green, width: 3),
     bottom: BorderSide(color: Colors.green, width: 3),
-  ),
-)
-
-// Left + Right
-ToastConfig(
-  customBorder: Border(
-    left: BorderSide(color: Colors.pink, width: 4),
-    right: BorderSide(color: Colors.blue, width: 4),
   ),
 )
 ```
@@ -225,28 +289,6 @@ ToastPosition.topLeft
 ToastPosition.bottom        // default
 ToastPosition.bottomRight
 ToastPosition.bottomLeft
-```
-
----
-
-## Persistent Toast
-
-```dart
-ElegantToast.showWarning(
-  title: 'Action required',
-  config: const ToastConfig(persistent: true),
-);
-
-ElegantToast.dismiss(); // dismiss programmatically
-```
-
----
-
-## Swipe to Dismiss
-
-```dart
-ToastConfig(swipeToDismiss: true)  // default
-ToastConfig(swipeToDismiss: false) // disable
 ```
 
 ---
@@ -287,10 +329,8 @@ ElegantToast.show(
     animation: ToastAnimation.scale,
     borderRadius: BorderRadius.circular(16),
     duration: const Duration(seconds: 5),
-    showCloseButton: true,
-    swipeToDismiss: true,
-    maxLines: 2,
-    showIcon: true,
+    iconSize: 24,
+    onDismiss: () => print('toast gone'),
     onTap: () => navigateToDetails(),
     action: ToastAction(
       label: 'View',
@@ -307,25 +347,32 @@ ElegantToast.show(
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `backgroundColor` | `Color?` | type default | Toast background color |
-| `borderColor` | `Color?` | type default | Toast border color (all sides) |
-| `leftBorderColor` | `Color?` | `null` | Left accent border — 4px wide |
-| `customBorder` | `Border?` | `null` | Fully custom border — any side, any width. Overrides `borderColor` and `leftBorderColor` |
+| `borderColor` | `Color?` | type default | Toast border color |
+| `leftBorderColor` | `Color?` | `null` | Left accent border |
+| `customBorder` | `Border?` | `null` | Fully custom border — overrides `borderColor` and `leftBorderColor` |
 | `icon` | `Widget?` | type icon | Custom icon widget |
-| `showIcon` | `bool` | `true` | Show/hide the icon — `false` for text-only toast |
-| `iconBackgroundColor` | `Color?` | type default | Icon circle background color |
+| `showIcon` | `bool` | `true` | Show/hide the icon |
+| `iconSize` | `double` | `22` | Size of the icon |
+| `iconBackgroundColor` | `Color?` | type default | Icon color |
 | `titleStyle` | `TextStyle?` | type default | Title text style |
 | `messageStyle` | `TextStyle?` | type default | Message text style |
-| `maxLines` | `int?` | `null` | Max lines for message — truncates with ellipsis |
+| `maxLines` | `int?` | `null` | Max lines for message |
 | `duration` | `Duration` | `3 seconds` | Auto-dismiss duration |
 | `showCloseButton` | `bool` | `true` | Show/hide × close button |
-| `borderRadius` | `BorderRadius?` | `12px` | Container border radius |
-| `padding` | `EdgeInsets?` | `h:14 v:12` | Internal padding |
+| `borderRadius` | `BorderRadius?` | `16px` | Container border radius |
+| `padding` | `EdgeInsets?` | `h:16 v:14` | Internal padding |
 | `showProgressBar` | `bool` | `false` | Animated countdown progress bar |
-| `progressBarColor` | `Color?` | type icon color | Progress bar color |
-| `action` | `ToastAction?` | `null` | Action button (Undo, Retry, etc.) |
+| `pauseOnHold` | `bool` | `true` | Long press pauses progress bar |
+| `progressBarColor` | `Color?` | type accent | Progress bar color |
+| `action` | `ToastAction?` | `null` | Action button |
 | `persistent` | `bool` | `false` | Disable auto-dismiss |
 | `swipeToDismiss` | `bool` | `true` | Swipe left/right to dismiss |
-| `onTap` | `VoidCallback?` | `null` | Callback when toast body is tapped |
+| `expandable` | `bool` | `false` | Show "Show more" button |
+| `expandedMessage` | `String?` | `null` | Full content shown when expanded |
+| `expandLabel` | `String` | `'Show more'` | Expand button label |
+| `collapseLabel` | `String` | `'Show less'` | Collapse button label |
+| `onTap` | `VoidCallback?` | `null` | Callback when toast is tapped |
+| `onDismiss` | `VoidCallback?` | `null` | Callback when toast is dismissed |
 | `animation` | `ToastAnimation` | `slideAndFade` | Entrance/exit animation style |
 
 ---
@@ -370,7 +417,7 @@ ElegantToast.show(
 |---|---|---|
 | `ToastType.success` | Green | Successful operations |
 | `ToastType.error` | Red | Failures, errors |
-| `ToastType.warning` | Yellow | Warnings, cautions |
+| `ToastType.warning` | Amber | Warnings, cautions |
 | `ToastType.info` | Blue | Informational messages |
 | `ToastType.neutral` | Gray | General notifications |
 
@@ -378,4 +425,4 @@ ElegantToast.show(
 
 ## License
 
-MIT © 2026 [RASEL](https://github.com/Rasel2510)
+MIT © 2026 [Rasel2510](https://github.com/Rasel2510)
