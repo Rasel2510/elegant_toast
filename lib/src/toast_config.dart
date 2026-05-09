@@ -152,12 +152,12 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFF6FCF5A),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF1B5E20),
-              borderColor: Color(0xFF2E7D32),
-              accentColor: Color(0xFF4CAF50),
-              iconColor: Color(0xFF81C784),
-              labelColor: Color(0xFFE8F5E9),
-              actionColor: Color(0xFF81C784),
+              backgroundColor: Color(0xFFF1FAF0),
+              borderColor: Color(0xFFB7DFB0),
+              accentColor: Color(0xFF2E7D32),
+              iconColor: Color(0xFF2E7D32),
+              labelColor: Color(0xFF1B3A1D),
+              actionColor: Color(0xFF2E7D32),
             );
 
     case ToastType.error:
@@ -171,12 +171,12 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFFEF9A9A),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF7F1010),
-              borderColor: Color(0xFFB71C1C),
-              accentColor: Color(0xFFE53935),
-              iconColor: Color(0xFFEF9A9A),
-              labelColor: Color(0xFFFFEBEE),
-              actionColor: Color(0xFFEF9A9A),
+              backgroundColor: Color(0xFFFFF0F0),
+              borderColor: Color(0xFFFFB3B3),
+              accentColor: Color(0xFFB71C1C),
+              iconColor: Color(0xFFB71C1C),
+              labelColor: Color(0xFF3E0A0A),
+              actionColor: Color(0xFFB71C1C),
             );
 
     case ToastType.warning:
@@ -190,12 +190,12 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFFFFCC80),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF4E2700),
-              borderColor: Color(0xFFE65100),
-              accentColor: Color(0xFFFFA726),
-              iconColor: Color(0xFFFFCC80),
-              labelColor: Color(0xFFFFF3E0),
-              actionColor: Color(0xFFFFCC80),
+              backgroundColor: Color(0xFFFFFBF0),
+              borderColor: Color(0xFFFFD98A),
+              accentColor: Color(0xFFE65100),
+              iconColor: Color(0xFFE65100),
+              labelColor: Color(0xFF3E2000),
+              actionColor: Color(0xFFE65100),
             );
 
     case ToastType.info:
@@ -209,12 +209,12 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFF90CAF9),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF0D47A1),
-              borderColor: Color(0xFF1565C0),
-              accentColor: Color(0xFF2196F3),
-              iconColor: Color(0xFF90CAF9),
-              labelColor: Color(0xFFE3F2FD),
-              actionColor: Color(0xFF90CAF9),
+              backgroundColor: Color(0xFFF0F7FF),
+              borderColor: Color(0xFFB3D4F5),
+              accentColor: Color(0xFF1565C0),
+              iconColor: Color(0xFF1565C0),
+              labelColor: Color(0xFF0A2A4A),
+              actionColor: Color(0xFF1565C0),
             );
 
     case ToastType.neutral:
@@ -228,12 +228,12 @@ ToastTheme getToastTheme(ToastType type,
               actionColor: Color(0xFFD0BCFF),
             )
           : const ToastTheme(
-              backgroundColor: Color(0xFF1C1B1F),
-              borderColor: Color(0xFF2C2B2F),
-              accentColor: Color(0xFFCAC4D0),
-              iconColor: Color(0xFFCAC4D0),
-              labelColor: Color(0xFFE6E1E5),
-              actionColor: Color(0xFFD0BCFF),
+              backgroundColor: Color(0xFFF5F5F7),
+              borderColor: Color(0xFFD4D0DA),
+              accentColor: Color(0xFF49454F),
+              iconColor: Color(0xFF49454F),
+              labelColor: Color(0xFF1C1B1F),
+              actionColor: Color(0xFF6750A4),
             );
   }
 }
