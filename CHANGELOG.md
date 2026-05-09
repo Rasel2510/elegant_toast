@@ -1,3 +1,10 @@
+# Changelog
+
+## 1.0.9
+
+### Bug Fixes
+- Fixed toast disappearing early after manually closing a previous one — stale auto-dismiss timers were firing on the next toast. Fixed with a generation token so old timers can never affect a newer toast.
+
 ## 1.0.8
 
 ### Visual Redesign — Premium Look

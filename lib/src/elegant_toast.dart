@@ -44,6 +44,11 @@ class ElegantToast {
   static OverlayEntry? _overlayEntry;
   static bool _isVisible = false;
 
+  /// Incremented every time a new toast is inserted.
+  /// Each auto-dismiss timer captures the value at creation time and only
+  /// fires if it still matches, preventing stale timers from killing new toasts.
+  static int _toastGeneration = 0;
+
   // Queue state
   static final List<_QueueItem> _queue = [];
   static bool _queueProcessing = false;
@@ -53,8 +58,7 @@ class ElegantToast {
   /// ```dart
   /// MaterialApp(navigatorKey: ElegantToast.navigatorKey)
   /// ```
-  static GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   static OverlayState? get _overlay => navigatorKey.currentState?.overlay;
 
@@ -420,6 +424,10 @@ class ElegantToast {
   }) {
     _dismissCurrent();
 
+    // Stamp this toast with the current generation so its timer can be
+    // invalidated if the toast is manually dismissed before it expires.
+    final myGeneration = ++_toastGeneration;
+
     void dismiss() {
       _dismissCurrent();
       onDone?.call();
@@ -439,12 +447,19 @@ class ElegantToast {
     overlay.insert(_overlayEntry!);
 
     if (!config.persistent) {
-      Future.delayed(config.duration, dismiss);
+      Future.delayed(config.duration, () {
+        // Only auto-dismiss if this is still the same toast that was shown.
+        // If the user closed it early, _toastGeneration has already advanced.
+        if (_toastGeneration == myGeneration) {
+          dismiss();
+        }
+      });
     }
   }
 
   static void _dismissCurrent() {
     if (_isVisible) {
+      _toastGeneration++; // invalidate any pending auto-dismiss timer
       _overlayEntry?.remove();
       _overlayEntry = null;
       _isVisible = false;
