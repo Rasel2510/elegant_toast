@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.5
+
+### Bug Fixes
+- Fixed `hapticFeedback` — extracted into a dedicated `_triggerHaptic()` async method so all `HapticFeedback` calls are properly awaited instead of fire-and-forget.
+
+### Documentation
+- Added `hapticFeedback` to the `ToastConfig` reference table in README.
+- Added `## Haptic Feedback` usage section with examples for all intensity levels.
+
 ## 1.1.4
 
 ### New Features

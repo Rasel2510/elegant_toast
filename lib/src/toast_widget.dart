@@ -105,16 +105,7 @@ class _ToastWidgetState extends State<ToastWidget>
     _enterController.forward();
 
     if (widget.config.hapticFeedback) {
-      switch (widget.type) {
-        case ToastType.error:
-          HapticFeedback.heavyImpact();
-          break;
-        case ToastType.warning:
-          HapticFeedback.mediumImpact();
-          break;
-        default:
-          HapticFeedback.lightImpact();
-      }
+      _triggerHaptic();
     }
 
     if (!widget.config.persistent && widget.config.showProgressBar) {
@@ -133,6 +124,21 @@ class _ToastWidgetState extends State<ToastWidget>
     _exitController.dispose();
     _progressController.dispose();
     super.dispose();
+  }
+
+  // ── Haptic ───────────────────────────────────────────────────────
+
+  Future<void> _triggerHaptic() async {
+    switch (widget.type) {
+      case ToastType.error:
+        await HapticFeedback.heavyImpact();
+        break;
+      case ToastType.warning:
+        await HapticFeedback.mediumImpact();
+        break;
+      default:
+        await HapticFeedback.lightImpact();
+    }
   }
 
   // ── Dismiss ──────────────────────────────────────────────────────
@@ -190,8 +196,9 @@ class _ToastWidgetState extends State<ToastWidget>
   }
 
   void _toggleExpand() {
-    if (!widget.config.expandable || widget.config.expandedMessage == null)
+    if (!widget.config.expandable || widget.config.expandedMessage == null) {
       return;
+    }
     setState(() => _isExpanded = !_isExpanded);
     if (widget.config.showProgressBar && !widget.config.persistent) {
       _isExpanded ? _progressController.stop() : _progressController.forward();

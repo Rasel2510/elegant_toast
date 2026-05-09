@@ -11,6 +11,7 @@ void main() {
       expect(config.persistent, false);
       expect(config.swipeToDismiss, true);
       expect(config.animation, ToastAnimation.slideAndFade);
+      expect(config.hapticFeedback, false);
     });
 
     test('custom values are applied', () {

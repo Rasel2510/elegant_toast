@@ -1,6 +1,6 @@
 # elegant_toast
 
-[![pub version](https://img.shields.io/badge/pub-1.1.4-blue)](https://pub.dev/packages/elegant_toast)
+[![pub version](https://img.shields.io/badge/pub-1.1.5-blue)](https://pub.dev/packages/elegant_toast)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)](https://flutter.dev)
 
@@ -38,7 +38,7 @@ A beautiful, customizable Flutter toast notification package with dark/light mod
 
 ```yaml
 dependencies:
-  elegant_toast: ^1.1.4
+  elegant_toast: ^1.1.5
 ```
 
 ---
@@ -269,6 +269,35 @@ ToastConfig(
 
 ---
 
+## Haptic Feedback
+
+```dart
+ElegantToast.showError(
+  title: 'Payment failed',
+  config: const ToastConfig(
+    hapticFeedback: true, // heavy impact for error
+  ),
+);
+
+ElegantToast.showWarning(
+  title: 'Session expiring',
+  config: const ToastConfig(
+    hapticFeedback: true, // medium impact for warning
+  ),
+);
+
+ElegantToast.showSuccess(
+  title: 'Saved!',
+  config: const ToastConfig(
+    hapticFeedback: true, // light impact for success / info / neutral
+  ),
+);
+```
+
+> Intensity is automatically chosen by toast type: `error` → heavy, `warning` → medium, all others → light.
+
+---
+
 ## Animations
 
 ```dart
@@ -374,6 +403,7 @@ ElegantToast.show(
 | `onTap` | `VoidCallback?` | `null` | Callback when toast is tapped |
 | `onDismiss` | `VoidCallback?` | `null` | Callback when toast is dismissed |
 | `animation` | `ToastAnimation` | `slideAndFade` | Entrance/exit animation style |
+| `hapticFeedback` | `bool` | `false` | Triggers haptic on appear; intensity varies by type (error=heavy, warning=medium, others=light) |
 
 ---
 
