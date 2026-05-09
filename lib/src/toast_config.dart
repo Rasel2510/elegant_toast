@@ -24,7 +24,7 @@ class ToastConfig {
   /// ```
   final bool showIcon;
 
-  /// Icon background color. Defaults to type color if null.
+  /// Icon color. Defaults to type color if null.
   final Color? iconBackgroundColor;
 
   /// Title text style override.
@@ -58,7 +58,7 @@ class ToastConfig {
   /// Default is false.
   final bool showProgressBar;
 
-  /// Color of the progress bar. Defaults to the type's icon color.
+  /// Color of the progress bar. Defaults to the type's accent color.
   final Color? progressBarColor;
 
   /// An optional action button shown inside the toast (e.g. "Undo", "Retry").
@@ -82,29 +82,10 @@ class ToastConfig {
 
   /// Optional left accent border color.
   /// When set, replaces the full border with a left-only colored border.
-  /// Useful for card-style toasts like appointment or reminder notifications.
-  ///
-  /// ```dart
-  /// ToastConfig(leftBorderColor: Color(0xFFE91E8C))
-  /// ```
   final Color? leftBorderColor;
 
   /// Fully custom border — use Flutter's [Border] to style any side.
   /// When set, overrides [borderColor] and [leftBorderColor].
-  ///
-  /// ```dart
-  /// // Left only
-  /// customBorder: Border(left: BorderSide(color: Colors.pink, width: 4))
-  ///
-  /// // Right only
-  /// customBorder: Border(right: BorderSide(color: Colors.blue, width: 4))
-  ///
-  /// // Top + Bottom
-  /// customBorder: Border(
-  ///   top: BorderSide(color: Colors.green, width: 3),
-  ///   bottom: BorderSide(color: Colors.green, width: 3),
-  /// )
-  /// ```
   final Border? customBorder;
 
   /// The entrance/exit animation style. Default is [ToastAnimation.slideAndFade].
@@ -135,79 +116,124 @@ class ToastConfig {
   });
 }
 
-/// Internal theme data resolved from [ToastType].
+/// Internal theme data resolved from [ToastType] and [Brightness].
 class ToastTheme {
   final Color backgroundColor;
   final Color borderColor;
   final Color accentColor;
-  final Color iconBackground;
-  final Color titleColor;
-  final Color messageColor;
-  final String iconLabel;
+  final Color iconColor;
+  final Color labelColor;
+  final Color actionColor;
 
   const ToastTheme({
     required this.backgroundColor,
     required this.borderColor,
     required this.accentColor,
-    required this.iconBackground,
-    required this.titleColor,
-    required this.messageColor,
-    required this.iconLabel,
+    required this.iconColor,
+    required this.labelColor,
+    required this.actionColor,
   });
 }
 
-/// Resolves the default theme colors for a given [ToastType].
-ToastTheme getToastTheme(ToastType type) {
+/// Resolves the default theme colors for a given [ToastType] and [Brightness].
+ToastTheme getToastTheme(ToastType type,
+    {Brightness brightness = Brightness.light}) {
+  final isDark = brightness == Brightness.dark;
+
   switch (type) {
     case ToastType.success:
-      return const ToastTheme(
-        backgroundColor: Color(0xFFF4FAF0),
-        borderColor: Color(0xFFD4EDBA),
-        accentColor: Color(0xFF3D9A2B),
-        iconBackground: Color(0xFF3D9A2B),
-        titleColor: Color(0xFF1A3D0F),
-        messageColor: Color(0xFF3A5C2C),
-        iconLabel: '✓',
-      );
+      return isDark
+          ? const ToastTheme(
+              backgroundColor: Color(0xFF1C2B18),
+              borderColor: Color(0xFF2D4A24),
+              accentColor: Color(0xFF6FCF5A),
+              iconColor: Color(0xFF6FCF5A),
+              labelColor: Color(0xFFD4EDBA),
+              actionColor: Color(0xFF6FCF5A),
+            )
+          : const ToastTheme(
+              backgroundColor: Color(0xFF1B2014),
+              borderColor: Color(0xFF2A3A1E),
+              accentColor: Color(0xFF4CAF50),
+              iconColor: Color(0xFF4CAF50),
+              labelColor: Color(0xFFE8F5E9),
+              actionColor: Color(0xFF81C784),
+            );
+
     case ToastType.error:
-      return const ToastTheme(
-        backgroundColor: Color(0xFFFFF5F5),
-        borderColor: Color(0xFFFFD5D5),
-        accentColor: Color(0xFFD93025),
-        iconBackground: Color(0xFFD93025),
-        titleColor: Color(0xFF5C0F0A),
-        messageColor: Color(0xFF7A2B26),
-        iconLabel: '✕',
-      );
+      return isDark
+          ? const ToastTheme(
+              backgroundColor: Color(0xFF2C1A1A),
+              borderColor: Color(0xFF4A2424),
+              accentColor: Color(0xFFEF5350),
+              iconColor: Color(0xFFEF5350),
+              labelColor: Color(0xFFFFCDD2),
+              actionColor: Color(0xFFEF9A9A),
+            )
+          : const ToastTheme(
+              backgroundColor: Color(0xFF211414),
+              borderColor: Color(0xFF3A1E1E),
+              accentColor: Color(0xFFE53935),
+              iconColor: Color(0xFFE53935),
+              labelColor: Color(0xFFFFEBEE),
+              actionColor: Color(0xFFEF9A9A),
+            );
+
     case ToastType.warning:
-      return const ToastTheme(
-        backgroundColor: Color(0xFFFFFBF0),
-        borderColor: Color(0xFFFFE8A3),
-        accentColor: Color(0xFFD97706),
-        iconBackground: Color(0xFFD97706),
-        titleColor: Color(0xFF4D2D00),
-        messageColor: Color(0xFF6B4010),
-        iconLabel: '!',
-      );
+      return isDark
+          ? const ToastTheme(
+              backgroundColor: Color(0xFF2B2210),
+              borderColor: Color(0xFF4A3A18),
+              accentColor: Color(0xFFFFB74D),
+              iconColor: Color(0xFFFFB74D),
+              labelColor: Color(0xFFFFE0B2),
+              actionColor: Color(0xFFFFCC80),
+            )
+          : const ToastTheme(
+              backgroundColor: Color(0xFF211A0A),
+              borderColor: Color(0xFF3A2E10),
+              accentColor: Color(0xFFFFA726),
+              iconColor: Color(0xFFFFA726),
+              labelColor: Color(0xFFFFF3E0),
+              actionColor: Color(0xFFFFCC80),
+            );
+
     case ToastType.info:
-      return const ToastTheme(
-        backgroundColor: Color(0xFFF3F8FF),
-        borderColor: Color(0xFFCCDFF8),
-        accentColor: Color(0xFF2563EB),
-        iconBackground: Color(0xFF2563EB),
-        titleColor: Color(0xFF0D2A6B),
-        messageColor: Color(0xFF2B4A82),
-        iconLabel: 'i',
-      );
+      return isDark
+          ? const ToastTheme(
+              backgroundColor: Color(0xFF182230),
+              borderColor: Color(0xFF1E3A52),
+              accentColor: Color(0xFF64B5F6),
+              iconColor: Color(0xFF64B5F6),
+              labelColor: Color(0xFFBBDEFB),
+              actionColor: Color(0xFF90CAF9),
+            )
+          : const ToastTheme(
+              backgroundColor: Color(0xFF101922),
+              borderColor: Color(0xFF152B3A),
+              accentColor: Color(0xFF2196F3),
+              iconColor: Color(0xFF2196F3),
+              labelColor: Color(0xFFE3F2FD),
+              actionColor: Color(0xFF90CAF9),
+            );
+
     case ToastType.neutral:
-      return const ToastTheme(
-        backgroundColor: Color(0xFFFAFAF9),
-        borderColor: Color(0xFFE5E4E0),
-        accentColor: Color(0xFF6B6B68),
-        iconBackground: Color(0xFF6B6B68),
-        titleColor: Color(0xFF1A1A18),
-        messageColor: Color(0xFF4A4A47),
-        iconLabel: '→',
-      );
+      return isDark
+          ? const ToastTheme(
+              backgroundColor: Color(0xFF2B2B2E),
+              borderColor: Color(0xFF3A3A3D),
+              accentColor: Color(0xFFCAC4D0),
+              iconColor: Color(0xFFCAC4D0),
+              labelColor: Color(0xFFE6E1E5),
+              actionColor: Color(0xFFD0BCFF),
+            )
+          : const ToastTheme(
+              backgroundColor: Color(0xFF1C1B1F),
+              borderColor: Color(0xFF2C2B2F),
+              accentColor: Color(0xFFCAC4D0),
+              iconColor: Color(0xFFCAC4D0),
+              labelColor: Color(0xFFE6E1E5),
+              actionColor: Color(0xFFD0BCFF),
+            );
   }
 }

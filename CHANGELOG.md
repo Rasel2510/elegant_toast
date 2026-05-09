@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0
+
+### New Features
+- **Dark mode** — all 5 variants adapt to the app's theme brightness automatically.
+- **Exit animation** — toasts slide back out with a fade instead of disappearing instantly.
+- **Swipe animation** — flies off screen in the drag direction; springs back if under threshold.
+- **Stacked toasts** — up to 3 toasts stack at once, newest in front. Oldest auto-drops when full.
+- **`ElegantToast.clearAll()`** — dismisses all stacked toasts and clears the queue.
+- Only the frontmost toast is interactive; back toasts ignore pointer events.
+
+### Internal
+- Replaced `_overlayEntry` with a `_stack` list managing up to 3 `OverlayEntry` instances.
+- Each toast has its own generation token so stale timers can't affect other toasts.
+- `markNeedsBuild()` syncs scale/offset animations when the stack changes.
+
 ## 1.0.9
 
 ### Bug Fixes

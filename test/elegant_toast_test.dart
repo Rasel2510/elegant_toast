@@ -40,9 +40,10 @@ void main() {
         final theme = getToastTheme(type);
         expect(theme.backgroundColor, isNotNull);
         expect(theme.borderColor, isNotNull);
-        expect(theme.iconBackground, isNotNull);
-        expect(theme.titleColor, isNotNull);
-        expect(theme.iconLabel, isNotEmpty);
+        expect(theme.iconColor, isNotNull);
+        expect(theme.labelColor, isNotNull);
+        expect(theme.actionColor, isNotNull);
+        expect(theme.accentColor, isNotNull);
       }
     });
   });

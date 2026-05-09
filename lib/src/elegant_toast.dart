@@ -25,50 +25,52 @@ import 'toast_widget.dart';
 /// ElegantToast.success(context, title: 'Done!');
 /// ```
 ///
-/// ## Loading toast
+/// ## Stacked toasts (default behaviour when calling multiple times)
+/// Up to 3 toasts stack behind each other. The newest is always on top.
+/// Older toasts scale down and offset slightly for a Sonner-style look.
 /// ```dart
-/// ElegantToast.showLoading(title: 'Uploading...');
-/// // later...
-/// ElegantToast.completeLoading(type: ToastType.success, title: 'Done!');
+/// ElegantToast.showSuccess(title: 'Saved!');
+/// ElegantToast.showError(title: 'Failed!');
+/// // Both visible — error in front, success stacked behind.
 /// ```
 ///
-/// ## Queue mode
+/// ## Queue mode (one at a time)
 /// ```dart
 /// ElegantToast.showSuccess(title: 'First', useQueue: true);
 /// ElegantToast.showError(title: 'Second', useQueue: true);
-/// // Shows one at a time, second waits for first to finish.
+/// ```
+///
+/// ## Loading toast
+/// ```dart
+/// ElegantToast.showLoading(title: 'Uploading...');
+/// ElegantToast.completeLoading(type: ToastType.success, title: 'Done!');
 /// ```
 class ElegantToast {
   ElegantToast._();
 
-  static OverlayEntry? _overlayEntry;
-  static bool _isVisible = false;
+  // ── Stack (max 3 toasts visible at once) ──────────────────────────
+  static const int _maxStack = 3;
+  static final List<_StackEntry> _stack = [];
 
-  /// Incremented every time a new toast is inserted.
-  /// Each auto-dismiss timer captures the value at creation time and only
-  /// fires if it still matches, preventing stale timers from killing new toasts.
+  // ── Generation token (prevents stale timers) ──────────────────────
   static int _toastGeneration = 0;
 
-  // Queue state
+  // ── Queue ─────────────────────────────────────────────────────────
   static final List<_QueueItem> _queue = [];
   static bool _queueProcessing = false;
 
+  // ── Loading overlay (separate — never stacked) ────────────────────
+  static OverlayEntry? _loadingEntry;
+
   /// Attach this to [MaterialApp.navigatorKey] to enable context-free calls.
-  ///
-  /// ```dart
-  /// MaterialApp(navigatorKey: ElegantToast.navigatorKey)
-  /// ```
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   static OverlayState? get _overlay => navigatorKey.currentState?.overlay;
 
   // ─────────────────────────────────────────────────────────────────
-  // Context-free static methods (no BuildContext needed)
+  // Context-free public API
   // ─────────────────────────────────────────────────────────────────
 
-  /// Shows a success toast without requiring a [BuildContext].
-  ///
-  /// Requires [navigatorKey] to be attached to [MaterialApp].
   static void showSuccess({
     required String title,
     String? message,
@@ -84,7 +86,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows an error toast without requiring a [BuildContext].
   static void showError({
     required String title,
     String? message,
@@ -100,7 +101,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows a warning toast without requiring a [BuildContext].
   static void showWarning({
     required String title,
     String? message,
@@ -116,7 +116,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows an info toast without requiring a [BuildContext].
   static void showInfo({
     required String title,
     String? message,
@@ -132,7 +131,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows a neutral toast without requiring a [BuildContext].
   static void showNeutral({
     required String title,
     String? message,
@@ -148,9 +146,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows a loading spinner toast without requiring a [BuildContext].
-  ///
-  /// Call [completeLoading] to replace it with a success/error toast.
   static void showLoading({
     required String title,
     String? message,
@@ -162,8 +157,8 @@ class ElegantToast {
       _logMissingKey();
       return;
     }
-    _dismissCurrent();
-    _overlayEntry = OverlayEntry(
+    _loadingEntry?.remove();
+    _loadingEntry = OverlayEntry(
       builder: (_) => LoadingToastWidget(
         title: title,
         message: message,
@@ -171,17 +166,9 @@ class ElegantToast {
         spinnerColor: spinnerColor,
       ),
     );
-    _isVisible = true;
-    overlay.insert(_overlayEntry!);
+    overlay.insert(_loadingEntry!);
   }
 
-  /// Replaces the current loading toast with a result toast.
-  ///
-  /// ```dart
-  /// ElegantToast.showLoading(title: 'Saving...');
-  /// await saveData();
-  /// ElegantToast.completeLoading(type: ToastType.success, title: 'Saved!');
-  /// ```
   static void completeLoading({
     required ToastType type,
     required String title,
@@ -189,7 +176,8 @@ class ElegantToast {
     ToastPosition position = ToastPosition.bottom,
     ToastConfig config = const ToastConfig(),
   }) {
-    _dismissCurrent();
+    _loadingEntry?.remove();
+    _loadingEntry = null;
     _showViaKey(
         title: title,
         message: message,
@@ -199,21 +187,31 @@ class ElegantToast {
         useQueue: false);
   }
 
-  /// Dismisses the currently visible toast immediately.
-  static void dismiss() => _dismissCurrent();
+  /// Dismisses the top (newest) toast.
+  static void dismiss() => _removeTop();
+
+  /// Dismisses all visible toasts and clears the queue.
+  static void clearAll() {
+    _queue.clear();
+    _queueProcessing = false;
+    for (final e in _stack) {
+      e.overlayEntry.remove();
+    }
+    _stack.clear();
+    _toastGeneration++;
+  }
 
   /// Clears all queued toasts and dismisses the current one.
   static void clearQueue() {
     _queue.clear();
     _queueProcessing = false;
-    _dismissCurrent();
+    _removeTop();
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Context-based methods (use inside widgets)
+  // Context-based public API
   // ─────────────────────────────────────────────────────────────────
 
-  /// Shows a success toast using a [BuildContext].
   static void success(
     BuildContext context, {
     required String title,
@@ -230,7 +228,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows an error toast using a [BuildContext].
   static void error(
     BuildContext context, {
     required String title,
@@ -247,7 +244,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows a warning toast using a [BuildContext].
   static void warning(
     BuildContext context, {
     required String title,
@@ -264,7 +260,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows an info toast using a [BuildContext].
   static void info(
     BuildContext context, {
     required String title,
@@ -281,7 +276,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows a neutral toast using a [BuildContext].
   static void neutral(
     BuildContext context, {
     required String title,
@@ -298,7 +292,6 @@ class ElegantToast {
           config: config,
           useQueue: useQueue);
 
-  /// Shows a fully customized toast using a [BuildContext].
   static void show(
     BuildContext context, {
     required String title,
@@ -317,7 +310,7 @@ class ElegantToast {
           useQueue: useQueue);
 
   // ─────────────────────────────────────────────────────────────────
-  // Internal
+  // Internal routing
   // ─────────────────────────────────────────────────────────────────
 
   static void _showViaKey({
@@ -334,14 +327,13 @@ class ElegantToast {
       return;
     }
     _enqueueOrShow(
-      overlay: overlay,
-      title: title,
-      message: message,
-      type: type,
-      position: position,
-      config: config,
-      useQueue: useQueue,
-    );
+        overlay: overlay,
+        title: title,
+        message: message,
+        type: type,
+        position: position,
+        config: config,
+        useQueue: useQueue);
   }
 
   static void _showViaContext(
@@ -354,14 +346,13 @@ class ElegantToast {
     required bool useQueue,
   }) {
     _enqueueOrShow(
-      overlay: Overlay.of(context),
-      title: title,
-      message: message,
-      type: type,
-      position: position,
-      config: config,
-      useQueue: useQueue,
-    );
+        overlay: Overlay.of(context),
+        title: title,
+        message: message,
+        type: type,
+        position: position,
+        config: config,
+        useQueue: useQueue);
   }
 
   static void _enqueueOrShow({
@@ -375,23 +366,21 @@ class ElegantToast {
   }) {
     if (useQueue) {
       _queue.add(_QueueItem(
-        overlay: overlay,
-        title: title,
-        message: message,
-        type: type,
-        position: position,
-        config: config,
-      ));
+          overlay: overlay,
+          title: title,
+          message: message,
+          type: type,
+          position: position,
+          config: config));
       _processQueue();
     } else {
-      _insertOverlay(
-        overlay: overlay,
-        title: title,
-        message: message,
-        type: type,
-        position: position,
-        config: config,
-      );
+      _pushToStack(
+          overlay: overlay,
+          title: title,
+          message: message,
+          type: type,
+          position: position,
+          config: config);
     }
   }
 
@@ -399,7 +388,7 @@ class ElegantToast {
     if (_queueProcessing || _queue.isEmpty) return;
     _queueProcessing = true;
     final item = _queue.removeAt(0);
-    _insertOverlay(
+    _pushToStack(
       overlay: item.overlay,
       title: item.title,
       message: item.message,
@@ -413,7 +402,11 @@ class ElegantToast {
     );
   }
 
-  static void _insertOverlay({
+  // ─────────────────────────────────────────────────────────────────
+  // Stack management
+  // ─────────────────────────────────────────────────────────────────
+
+  static void _pushToStack({
     required OverlayState overlay,
     required String title,
     String? message,
@@ -422,48 +415,78 @@ class ElegantToast {
     required ToastConfig config,
     VoidCallback? onDone,
   }) {
-    _dismissCurrent();
+    // If stack is full, remove the oldest (bottom) entry
+    if (_stack.length >= _maxStack) {
+      final oldest = _stack.removeAt(0);
+      oldest.overlayEntry.remove();
+    }
 
-    // Stamp this toast with the current generation so its timer can be
-    // invalidated if the toast is manually dismissed before it expires.
     final myGeneration = ++_toastGeneration;
+    late final _StackEntry entry;
 
-    void dismiss() {
-      _dismissCurrent();
+    void dismissThis() {
+      final idx = _stack.indexOf(entry);
+      if (idx == -1) return; // already removed
+      _toastGeneration++;
+      _stack.removeAt(idx);
+      entry.overlayEntry.remove();
+      // Rebuild remaining entries so they animate to new stack positions
+      _rebuildStack();
       onDone?.call();
     }
 
-    _overlayEntry = OverlayEntry(
-      builder: (_) => ToastWidget(
-        title: title,
-        message: message,
-        type: type,
-        position: position,
-        config: config,
-        onDismiss: dismiss,
-      ),
+    final overlayEntry = OverlayEntry(
+      builder: (_) {
+        final stackIndex = _stack.indexOf(entry);
+        final stackSize = _stack.length;
+        return ToastWidget(
+          title: title,
+          message: message,
+          type: type,
+          position: position,
+          config: config,
+          stackIndex: stackIndex == -1 ? 0 : stackIndex,
+          stackSize: stackSize,
+          onDismiss: dismissThis,
+        );
+      },
     );
-    _isVisible = true;
-    overlay.insert(_overlayEntry!);
 
+    entry = _StackEntry(
+      overlayEntry: overlayEntry,
+      generation: myGeneration,
+    );
+
+    _stack.add(entry);
+    overlay.insert(overlayEntry);
+
+    // Rebuild existing toasts so they shift back in the stack
+    _rebuildStack();
+
+    // Auto-dismiss
     if (!config.persistent) {
       Future.delayed(config.duration, () {
-        // Only auto-dismiss if this is still the same toast that was shown.
-        // If the user closed it early, _toastGeneration has already advanced.
-        if (_toastGeneration == myGeneration) {
-          dismiss();
+        if (entry.generation == myGeneration && _stack.contains(entry)) {
+          dismissThis();
         }
       });
     }
   }
 
-  static void _dismissCurrent() {
-    if (_isVisible) {
-      _toastGeneration++; // invalidate any pending auto-dismiss timer
-      _overlayEntry?.remove();
-      _overlayEntry = null;
-      _isVisible = false;
+  /// Marks all stack entries dirty so they rebuild with updated stackIndex.
+  static void _rebuildStack() {
+    for (final e in _stack) {
+      e.overlayEntry.markNeedsBuild();
     }
+  }
+
+  /// Removes the top (newest/frontmost) toast.
+  static void _removeTop() {
+    if (_stack.isEmpty) return;
+    final top = _stack.removeLast();
+    _toastGeneration++;
+    top.overlayEntry.remove();
+    _rebuildStack();
   }
 
   static void _logMissingKey() {
@@ -474,6 +497,15 @@ class ElegantToast {
   }
 }
 
+// ── Internal stack entry ───────────────────────────────────────────
+class _StackEntry {
+  final OverlayEntry overlayEntry;
+  final int generation;
+
+  _StackEntry({required this.overlayEntry, required this.generation});
+}
+
+// ── Queue item ─────────────────────────────────────────────────────
 class _QueueItem {
   final OverlayState overlay;
   final String title;
