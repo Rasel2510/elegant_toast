@@ -4,6 +4,7 @@ import 'toast_type.dart';
 import 'toast_position.dart';
 import 'toast_config.dart';
 import 'toast_animation.dart';
+import 'toast_haptic_intensity.dart';
 import 'widgets/toast_curve.dart';
 import 'widgets/toast_icon.dart';
 import 'widgets/toast_close_button.dart';
@@ -129,15 +130,26 @@ class _ToastWidgetState extends State<ToastWidget>
   // ── Haptic ───────────────────────────────────────────────────────
 
   Future<void> _triggerHaptic() async {
-    switch (widget.type) {
-      case ToastType.error:
+    final intensity = widget.config.hapticIntensity ??
+        switch (widget.type) {
+          ToastType.error => HapticIntensity.heavy,
+          ToastType.warning => HapticIntensity.medium,
+          _ => HapticIntensity.light,
+        };
+
+    switch (intensity) {
+      case HapticIntensity.heavy:
         await HapticFeedback.heavyImpact();
         break;
-      case ToastType.warning:
+      case HapticIntensity.medium:
         await HapticFeedback.mediumImpact();
         break;
-      default:
+      case HapticIntensity.light:
         await HapticFeedback.lightImpact();
+        break;
+      case HapticIntensity.selection:
+        await HapticFeedback.selectionClick();
+        break;
     }
   }
 
@@ -196,9 +208,8 @@ class _ToastWidgetState extends State<ToastWidget>
   }
 
   void _toggleExpand() {
-    if (!widget.config.expandable || widget.config.expandedMessage == null) {
+    if (!widget.config.expandable || widget.config.expandedMessage == null)
       return;
-    }
     setState(() => _isExpanded = !_isExpanded);
     if (widget.config.showProgressBar && !widget.config.persistent) {
       _isExpanded ? _progressController.stop() : _progressController.forward();

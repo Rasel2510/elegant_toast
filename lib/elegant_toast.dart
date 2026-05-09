@@ -38,3 +38,4 @@ export 'src/toast_position.dart';
 export 'src/toast_config.dart';
 export 'src/toast_animation.dart';
 export 'src/toast_action.dart';
+export 'src/toast_haptic_intensity.dart';

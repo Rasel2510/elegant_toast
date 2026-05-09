@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'toast_type.dart';
 import 'toast_animation.dart';
 import 'toast_action.dart';
+import 'toast_haptic_intensity.dart';
 
 /// Configuration for customizing the toast appearance and behavior.
 ///
@@ -118,6 +119,14 @@ class ToastConfig {
   /// ```
   final bool hapticFeedback;
 
+  /// Overrides the automatic haptic intensity when [hapticFeedback] is true.
+  /// If null, intensity is chosen by toast type (error=heavy, warning=medium, others=light).
+  ///
+  /// ```dart
+  /// ToastConfig(hapticFeedback: true, hapticIntensity: HapticIntensity.heavy)
+  /// ```
+  final HapticIntensity? hapticIntensity;
+
   /// The entrance/exit animation style. Default is [ToastAnimation.slideAndFade].
   final ToastAnimation animation;
 
@@ -166,6 +175,7 @@ class ToastConfig {
     this.leftBorderColor,
     this.customBorder,
     this.hapticFeedback = false,
+    this.hapticIntensity,
     this.animation = ToastAnimation.slideAndFade,
     this.iconSize = 22,
     this.onDismiss,

@@ -1,6 +1,6 @@
 # elegant_toast
 
-[![pub version](https://img.shields.io/badge/pub-1.1.5-blue)](https://pub.dev/packages/elegant_toast)
+[![pub version](https://img.shields.io/badge/pub-1.1.6-blue)](https://pub.dev/packages/elegant_toast)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)](https://flutter.dev)
 
@@ -38,7 +38,7 @@ A beautiful, customizable Flutter toast notification package with dark/light mod
 
 ```yaml
 dependencies:
-  elegant_toast: ^1.1.5
+  elegant_toast: ^1.1.6
 ```
 
 ---
@@ -272,29 +272,33 @@ ToastConfig(
 ## Haptic Feedback
 
 ```dart
+// Auto intensity by type (error=heavy, warning=medium, others=light)
 ElegantToast.showError(
   title: 'Payment failed',
   config: const ToastConfig(
-    hapticFeedback: true, // heavy impact for error
+    hapticFeedback: true,
   ),
 );
 
-ElegantToast.showWarning(
-  title: 'Session expiring',
-  config: const ToastConfig(
-    hapticFeedback: true, // medium impact for warning
-  ),
-);
-
+// Override intensity manually
 ElegantToast.showSuccess(
   title: 'Saved!',
   config: const ToastConfig(
-    hapticFeedback: true, // light impact for success / info / neutral
+    hapticFeedback: true,
+    hapticIntensity: HapticIntensity.heavy,
+  ),
+);
+
+ElegantToast.showInfo(
+  title: 'New message',
+  config: const ToastConfig(
+    hapticFeedback: true,
+    hapticIntensity: HapticIntensity.selection, // subtle tick
   ),
 );
 ```
 
-> Intensity is automatically chosen by toast type: `error` → heavy, `warning` → medium, all others → light.
+> If `hapticIntensity` is not set, intensity is automatically chosen by toast type: `error` → heavy, `warning` → medium, all others → light.
 
 ---
 
@@ -345,22 +349,60 @@ ElegantToast.show(
   title: 'Custom styled!',
   message: 'Fully custom colors, icon, and animation.',
   position: ToastPosition.top,
+  useQueue: false,
   config: ToastConfig(
+    // Colors
     backgroundColor: const Color(0xFF1A1A2E),
     borderColor: const Color(0xFF7F77DD),
     leftBorderColor: const Color(0xFF7F77DD),
     iconBackgroundColor: const Color(0xFF7F77DD),
+
+    // Custom border (overrides borderColor & leftBorderColor)
+    // customBorder: Border(left: BorderSide(color: Color(0xFF7F77DD), width: 4)),
+
+    // Icon
     icon: const Icon(Icons.star_rounded, color: Colors.white, size: 16),
+    showIcon: true,
+    iconSize: 24,
+
+    // Text styles
     titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
     messageStyle: const TextStyle(color: Colors.white70),
+    maxLines: 2,
+
+    // Layout
+    borderRadius: BorderRadius.circular(16),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+
+    // Duration & dismissal
+    duration: const Duration(seconds: 5),
+    persistent: false,
+    showCloseButton: true,
+    swipeToDismiss: true,
+
+    // Progress bar
     showProgressBar: true,
     progressBarColor: const Color(0xFF7F77DD),
+    pauseOnHold: true,
+
+    // Animation
     animation: ToastAnimation.scale,
-    borderRadius: BorderRadius.circular(16),
-    duration: const Duration(seconds: 5),
-    iconSize: 24,
-    onDismiss: () => print('toast gone'),
+
+    // Haptic
+    hapticFeedback: true,
+    hapticIntensity: HapticIntensity.heavy,
+
+    // Expandable
+    expandable: true,
+    expandedMessage: 'Here are the full details of this notification.',
+    expandLabel: 'Show more',
+    collapseLabel: 'Show less',
+
+    // Callbacks
     onTap: () => navigateToDetails(),
+    onDismiss: () => print('toast gone'),
+
+    // Action button
     action: ToastAction(
       label: 'View',
       onPressed: () => navigateToDetails(),
@@ -404,6 +446,7 @@ ElegantToast.show(
 | `onDismiss` | `VoidCallback?` | `null` | Callback when toast is dismissed |
 | `animation` | `ToastAnimation` | `slideAndFade` | Entrance/exit animation style |
 | `hapticFeedback` | `bool` | `false` | Triggers haptic on appear; intensity varies by type (error=heavy, warning=medium, others=light) |
+| `hapticIntensity` | `HapticIntensity?` | `null` | Overrides automatic haptic intensity: `light`, `medium`, `heavy`, `selection` |
 
 ---
 

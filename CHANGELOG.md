@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.6
+
+### New Features
+Added hapticIntensity — override the automatic haptic intensity with HapticIntensity.light, medium, heavy, or selection. If not set, intensity is still chosen automatically by toast type.
+
+
 ## 1.1.5
 
 ### Bug Fixes
