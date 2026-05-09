@@ -1,6 +1,6 @@
 # elegant_toast
 
-[![pub version](https://img.shields.io/badge/pub-1.1.6-blue)](https://pub.dev/packages/elegant_toast)
+[![pub version](https://img.shields.io/badge/pub-1.1.7-blue)](https://pub.dev/packages/elegant_toast)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)](https://flutter.dev)
 
@@ -38,7 +38,7 @@ A beautiful, customizable Flutter toast notification package with dark/light mod
 
 ```yaml
 dependencies:
-  elegant_toast: ^1.1.6
+  elegant_toast: ^1.1.7
 ```
 
 ---

@@ -208,8 +208,9 @@ class _ToastWidgetState extends State<ToastWidget>
   }
 
   void _toggleExpand() {
-    if (!widget.config.expandable || widget.config.expandedMessage == null)
+    if (!widget.config.expandable || widget.config.expandedMessage == null) {
       return;
+    }
     setState(() => _isExpanded = !_isExpanded);
     if (widget.config.showProgressBar && !widget.config.persistent) {
       _isExpanded ? _progressController.stop() : _progressController.forward();
