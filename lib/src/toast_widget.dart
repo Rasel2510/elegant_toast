@@ -306,24 +306,32 @@ class _ToastWidgetState extends State<ToastWidget>
   }
 
   Widget _buildStackTransform(Widget child) {
-    if (widget.stackIndex == 0) return child;
-
-    final depth = widget.stackIndex;
-    final scale = 1.0 - (depth * 0.06);
+    final depth = widget.stackIndex; // 0 = newest/front, higher = older/back
     final isTop = _isTopPosition;
-    final yShift = isTop ? -(depth * 8.0) : (depth * 8.0);
+
+    // Each older toast shifts away from the screen edge so they fan out visibly.
+    // iOS style: newest stays in place, older ones slide further back.
+    final yShift = isTop
+        ? -(depth * 72.0) // top toasts: older ones go UP (away from centre)
+        : (depth * 72.0); // bottom toasts: older ones go DOWN
+
+    // Slight scale reduction per depth level — just enough to show depth.
+    final scale = 1.0 - (depth * 0.04);
+
+    // Older toasts are slightly dimmed.
+    final opacity = 1.0 - (depth * 0.12);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 380),
       curve: Curves.easeOutCubic,
       transform: Matrix4.identity()
         ..translateByDouble(0.0, yShift, 0.0, 1.0)
         ..scaleByDouble(scale, scale, 1.0, 1.0),
       transformAlignment: isTop ? Alignment.topCenter : Alignment.bottomCenter,
       child: IgnorePointer(
-        ignoring: true,
+        ignoring: depth > 0,
         child: Opacity(
-          opacity: 1.0 - (depth * 0.15),
+          opacity: opacity.clamp(0.0, 1.0),
           child: child,
         ),
       ),

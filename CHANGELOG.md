@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+
+### New Features
+- Redesigned toast stack layout to iOS lock screen style — stacked toasts now fan out fully (72px offset per depth) so each toast is completely readable, with subtle scale (4%) and opacity (12%) reduction per depth level. Previously toasts were barely visible behind the front toast (8px offset, Sonner style).
+
+### Documentation
+- Updated `## Fully Custom Toast` snippet to include all available options.
+- Updated `ToastConfig` reference table with all properties.
+
 ## 1.1.7
 
 ### Improvements
@@ -8,8 +17,7 @@
 ## 1.1.6
 
 ### New Features
-Added hapticIntensity — override the automatic haptic intensity with HapticIntensity.light, medium, heavy, or selection. If not set, intensity is still chosen automatically by toast type.
-
+- Added `hapticIntensity` — override the automatic haptic intensity with `HapticIntensity.light`, `medium`, `heavy`, or `selection`. If not set, intensity is still chosen automatically by toast type.
 
 ## 1.1.5
 
@@ -29,7 +37,7 @@ Added hapticIntensity — override the automatic haptic intensity with HapticInt
 ## 1.1.3
 
 ### New Features
-- Added `expandable` toast — set `expandable: true` and `expandedMessage` to show 
+- Added `expandable` toast — set `expandable: true` and `expandedMessage` to show
   a "Show more" button that animates open with full content
 - Added `onDismiss` callback — called when toast is dismissed (auto, manual, or swipe)
 - Added `iconSize` — customize the icon size (default 22)
@@ -90,14 +98,12 @@ Added hapticIntensity — override the automatic haptic intensity with HapticInt
 - **`onTap`** — tap anywhere on the toast body to trigger a callback
 - **`showIcon: false`** — hide the icon for a simple text-only toast
 - **`maxLines`** — limit message lines with ellipsis overflow
--
 
 ## 1.0.5
 
 ### New Features
 - **Left border accent** — `leftBorderColor` in `ToastConfig` adds a colored left-side border
 - Useful for card-style toasts like appointments, reminders, or calendar events
-
 
 ## 1.0.4
 
