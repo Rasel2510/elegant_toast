@@ -6,14 +6,13 @@ import 'toast_config.dart';
 import 'toast_animation.dart';
 import 'toast_haptic_intensity.dart';
 import 'widgets/toast_curve.dart';
-import 'widgets/toast_icon.dart';
-import 'widgets/toast_close_button.dart';
-import 'widgets/toast_action_button.dart';
-import 'widgets/toast_progress_bar.dart';
+import 'widgets/toast_animated.dart';
+import 'widgets/toast_stack_transform.dart';
+import 'widgets/toast_body.dart';
 
 export 'widgets/toast_loading_widget.dart';
 
-/// Internal widget that renders the Android Material 3 style toast.
+/// Internal widget that renders the toast overlay.
 class ToastWidget extends StatefulWidget {
   final String title;
   final String? message;
@@ -58,10 +57,16 @@ class _ToastWidgetState extends State<ToastWidget>
   bool _isDismissing = false;
   bool _isExpanded = false;
 
+  bool get _isTopPosition =>
+      widget.position == ToastPosition.top ||
+      widget.position == ToastPosition.topLeft ||
+      widget.position == ToastPosition.topRight;
+
+  // ── Init & Dispose ───────────────────────────────────────────────
+
   @override
   void initState() {
     super.initState();
-
     _enterController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 320),
@@ -74,11 +79,9 @@ class _ToastWidgetState extends State<ToastWidget>
       vsync: this,
       duration: widget.config.duration,
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _enterController, curve: Curves.easeOut),
     );
-
     _slideAnimation = Tween<Offset>(
       begin: Offset(0, _isTopPosition ? -0.6 : 0.6),
       end: Offset.zero,
@@ -88,11 +91,9 @@ class _ToastWidgetState extends State<ToastWidget>
           ? Curves.elasticOut
           : const ToastCurve(),
     ));
-
     _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _enterController, curve: Curves.easeOutBack),
     );
-
     _exitFade = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _exitController, curve: Curves.easeIn),
     );
@@ -102,22 +103,12 @@ class _ToastWidgetState extends State<ToastWidget>
     ).animate(
       CurvedAnimation(parent: _exitController, curve: Curves.easeIn),
     );
-
     _enterController.forward();
-
-    if (widget.config.hapticFeedback) {
-      _triggerHaptic();
-    }
-
+    if (widget.config.hapticFeedback) _triggerHaptic();
     if (!widget.config.persistent && widget.config.showProgressBar) {
       _progressController.forward();
     }
   }
-
-  bool get _isTopPosition =>
-      widget.position == ToastPosition.top ||
-      widget.position == ToastPosition.topLeft ||
-      widget.position == ToastPosition.topRight;
 
   @override
   void dispose() {
@@ -136,7 +127,6 @@ class _ToastWidgetState extends State<ToastWidget>
           ToastType.warning => HapticIntensity.medium,
           _ => HapticIntensity.light,
         };
-
     switch (intensity) {
       case HapticIntensity.heavy:
         await HapticFeedback.heavyImpact();
@@ -166,23 +156,18 @@ class _ToastWidgetState extends State<ToastWidget>
   Future<void> _swipeDismiss(double targetX) async {
     if (_isDismissing) return;
     _isDismissing = true;
-
     final swipeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 220),
     );
-
     final swipeAnim = Tween<double>(begin: _dragOffset, end: targetX).animate(
       CurvedAnimation(parent: swipeController, curve: Curves.easeOut),
     );
-
     swipeAnim.addListener(() {
       if (mounted) setState(() => _dragOffset = swipeAnim.value);
     });
-
     _exitController.animateTo(1.0,
         duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
-
     await swipeController.forward();
     swipeController.dispose();
     widget.config.onDismiss?.call();
@@ -227,8 +212,7 @@ class _ToastWidgetState extends State<ToastWidget>
     final velocity = d.primaryVelocity ?? 0;
     final screenWidth = MediaQuery.of(context).size.width;
     if (_dragOffset.abs() > 80 || velocity.abs() > 600) {
-      final targetX = _dragOffset > 0 ? screenWidth : -screenWidth;
-      _swipeDismiss(targetX);
+      _swipeDismiss(_dragOffset > 0 ? screenWidth : -screenWidth);
     } else {
       _snapBack();
     }
@@ -283,211 +267,6 @@ class _ToastWidgetState extends State<ToastWidget>
     );
   }
 
-  // ── Animation builders ───────────────────────────────────────────
-
-  Widget _buildAnimated(Widget child) {
-    final entered = switch (widget.config.animation) {
-      ToastAnimation.fade =>
-        FadeTransition(opacity: _fadeAnimation, child: child),
-      ToastAnimation.scale => FadeTransition(
-          opacity: _fadeAnimation,
-          child: ScaleTransition(scale: _scaleAnimation, child: child),
-        ),
-      _ => FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(position: _slideAnimation, child: child),
-        ),
-    };
-
-    return FadeTransition(
-      opacity: _exitFade,
-      child: SlideTransition(position: _exitSlide, child: entered),
-    );
-  }
-
-  Widget _buildStackTransform(Widget child) {
-    final depth = widget.stackIndex; // 0 = newest/front, higher = older/back
-    final isTop = _isTopPosition;
-
-    // Each older toast shifts away from the screen edge so they fan out visibly.
-    // iOS style: newest stays in place, older ones slide further back.
-    final yShift = isTop
-        ? -(depth * 72.0) // top toasts: older ones go UP (away from centre)
-        : (depth * 72.0); // bottom toasts: older ones go DOWN
-
-    // Slight scale reduction per depth level — just enough to show depth.
-    final scale = 1.0 - (depth * 0.04);
-
-    // Older toasts are slightly dimmed.
-    final opacity = 1.0 - (depth * 0.12);
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 380),
-      curve: Curves.easeOutCubic,
-      transform: Matrix4.identity()
-        ..translateByDouble(0.0, yShift, 0.0, 1.0)
-        ..scaleByDouble(scale, scale, 1.0, 1.0),
-      transformAlignment: isTop ? Alignment.topCenter : Alignment.bottomCenter,
-      child: IgnorePointer(
-        ignoring: depth > 0,
-        child: Opacity(
-          opacity: opacity.clamp(0.0, 1.0),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  // ── Content builders ─────────────────────────────────────────────
-
-  Widget _buildTextColumn(
-      Color labelColor, Color actionColor, ToastConfig config) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          widget.title,
-          style: config.titleStyle ??
-              TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: labelColor,
-                letterSpacing: 0.1,
-                height: 1.4,
-              ),
-        ),
-        if (widget.message != null && widget.message!.isNotEmpty) ...[
-          const SizedBox(height: 2),
-          Text(
-            widget.message!,
-            maxLines: config.maxLines,
-            overflow: config.maxLines != null ? TextOverflow.ellipsis : null,
-            style: config.messageStyle ??
-                TextStyle(
-                  fontSize: 12,
-                  color: labelColor.withValues(alpha: 0.70),
-                  height: 1.5,
-                  letterSpacing: 0.2,
-                ),
-          ),
-        ],
-        if (config.expandable &&
-            config.expandedMessage != null &&
-            _isExpanded) ...[
-          const SizedBox(height: 6),
-          Text(
-            config.expandedMessage!,
-            style: config.messageStyle ??
-                TextStyle(
-                  fontSize: 12,
-                  color: labelColor.withValues(alpha: 0.70),
-                  height: 1.5,
-                  letterSpacing: 0.2,
-                ),
-          ),
-        ],
-        if (config.expandable && config.expandedMessage != null) ...[
-          const SizedBox(height: 4),
-          GestureDetector(
-            onTap: _toggleExpand,
-            child: Text(
-              _isExpanded ? config.collapseLabel : config.expandLabel,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: actionColor,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildContentRow(Color iconColor, Color labelColor, Color actionColor,
-      ToastConfig config) {
-    return Padding(
-      padding: config.padding ??
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (config.showIcon) ...[
-            config.icon ??
-                ToastIcon(
-                  type: widget.type,
-                  color: iconColor,
-                  size: config.iconSize,
-                ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: _buildTextColumn(labelColor, actionColor, config),
-          ),
-          if (config.action != null) ...[
-            const SizedBox(width: 8),
-            ToastActionButton(
-              label: config.action!.label,
-              labelStyle: config.action!.labelStyle,
-              color: actionColor,
-              onTap: () {
-                config.action!.onPressed();
-                _animatedDismiss();
-              },
-            ),
-          ],
-          if (config.showCloseButton) ...[
-            const SizedBox(width: 4),
-            ToastCloseButton(
-              color: labelColor,
-              onTap: _animatedDismiss,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToastBody(Color bgColor, Color iconColor, Color labelColor,
-      Color actionColor, Color progressColor, ToastConfig config) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 288, maxWidth: 560),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: config.borderRadius ?? BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.22),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: config.borderRadius ?? BorderRadius.circular(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildContentRow(iconColor, labelColor, actionColor, config),
-            if (config.showProgressBar && !config.persistent)
-              ToastProgressBar(
-                controller: _progressController,
-                color: progressColor,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ── Build ────────────────────────────────────────────────────────
 
   @override
@@ -508,9 +287,18 @@ class _ToastWidgetState extends State<ToastWidget>
         alignment: _alignment,
         child: Padding(
           padding: _screenPadding,
-          child: _buildStackTransform(
-            _buildAnimated(
-              GestureDetector(
+          child: ToastStackTransform(
+            position: widget.position,
+            stackIndex: widget.stackIndex,
+            child: ToastAnimated(
+              animation: config.animation,
+              isTopPosition: _isTopPosition,
+              fadeAnimation: _fadeAnimation,
+              slideAnimation: _slideAnimation,
+              scaleAnimation: _scaleAnimation,
+              exitFade: _exitFade,
+              exitSlide: _exitSlide,
+              child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onHorizontalDragUpdate: _handleDragUpdate,
                 onHorizontalDragEnd: _handleDragEnd,
@@ -522,13 +310,20 @@ class _ToastWidgetState extends State<ToastWidget>
                   offset: Offset(_dragOffset, 0),
                   child: Opacity(
                     opacity: (1 - (_dragOffset.abs() / 180)).clamp(0.0, 1.0),
-                    child: _buildToastBody(
-                      bgColor,
-                      iconColor,
-                      labelColor,
-                      actionColor,
-                      progressColor,
-                      config,
+                    child: ToastBody(
+                      title: widget.title,
+                      message: widget.message,
+                      type: widget.type,
+                      config: config,
+                      bgColor: bgColor,
+                      iconColor: iconColor,
+                      labelColor: labelColor,
+                      actionColor: actionColor,
+                      progressColor: progressColor,
+                      isExpanded: _isExpanded,
+                      progressController: _progressController,
+                      onToggleExpand: _toggleExpand,
+                      onDismiss: _animatedDismiss,
                     ),
                   ),
                 ),

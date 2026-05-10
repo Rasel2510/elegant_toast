@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.3.0
+
+### New Features
+- Redesigned toast stack to iOS lock screen style — collapsed mode shows a 12px peek per depth; swipe up fans out to 68px so every toast is fully readable. Swipe down collapses back.
+- Added `ToastStackState` — dedicated file managing shared stack expansion state, wired to `ElegantToast` via `onChanged` callback.
+
+### Internal Refactor
+- Split `toast_widget.dart` (507 lines) into 5 focused files:
+  - `widgets/toast_animated.dart` — enter/exit animation transitions
+  - `widgets/toast_stack_transform.dart` — iOS stack layout + swipe-up gesture
+  - `widgets/toast_body.dart` — container, shadow, border radius, progress bar
+  - `widgets/toast_content_row.dart` — icon, text, action button, close button row
+  - `widgets/toast_text_column.dart` — title, message, expandable content
+- `toast_widget.dart` now contains only state, gestures, and build (337 lines)
+
+### Bug Fixes
+- Fixed: dismissing the front toast now correctly animates the back toast into position
+- Fixed: stack expansion state resets automatically when all toasts are dismissed or `clearAll()` is called.
+
 ## 1.2.0
 
 ### New Features

@@ -20,6 +20,8 @@ A beautiful, customizable Flutter toast notification package with dark/light mod
 - ✅ `onTap` — tap anywhere on the toast to trigger a callback
 - ✅ `iconSize` — customize the icon size
 - ✅ Toast queue — multiple toasts show one after another
+- ✅ **iOS-style stack** — swipe up to expand, down to collapse
+- ✅ **Stack expansion callback** — `ElegantToast.onChanged` for UI reactions
 - ✅ Swipe to dismiss
 - ✅ Persistent toast — no auto-dismiss
 - ✅ Loading toast — shows spinner, converts to success/error
@@ -38,7 +40,7 @@ A beautiful, customizable Flutter toast notification package with dark/light mod
 
 ```yaml
 dependencies:
-  elegant_toast: ^1.2.0
+  elegant_toast: ^1.3.0
 ```
 
 ---

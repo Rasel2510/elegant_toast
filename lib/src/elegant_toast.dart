@@ -3,6 +3,7 @@ import 'toast_type.dart';
 import 'toast_position.dart';
 import 'toast_config.dart';
 import 'toast_widget.dart';
+import 'toast_stack_state.dart';
 
 /// A beautiful, customizable Flutter toast notification system.
 ///
@@ -207,6 +208,7 @@ class ElegantToast {
   static void clearAll() {
     _queue.clear();
     _queueProcessing = false;
+    ToastStackState.reset();
     for (final e in _stack) {
       e.overlayEntry.remove();
     }
@@ -443,6 +445,7 @@ class ElegantToast {
       _toastGeneration++;
       _stack.removeAt(idx);
       entry.overlayEntry.remove();
+      if (_stack.isEmpty) ToastStackState.reset();
       // Rebuild remaining entries so they animate to new stack positions
       _rebuildStack();
       onDone?.call();
@@ -472,6 +475,7 @@ class ElegantToast {
 
     _stack.add(entry);
     overlay.insert(overlayEntry);
+    ToastStackState.onChanged = _rebuildStack; // wire swipe-up rebuild
 
     // Rebuild existing toasts so they shift back in the stack
     _rebuildStack();
